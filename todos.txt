@@ -1,0 +1,32 @@
+a function that converts a midi message into an object ie
+while(midirec(0,1,2,3))
+  msg.mo(m0,m1,m2,m3);
+  msg.chan = 
+  msg.offset = m0
+  msg.CC = // will return -1 if not a cc msg, else cc#
+  msg.CCval =
+  msg.note = // will return -1 or note
+  mdg.vel = // will return -1, 0, or vel
+  // pitch
+  // manipulate these to hearts content, then
+  msg.send() // midisend(a, b, c, d)
+
+function mo(m0, m1, m2, m3)
+(
+  this.chan = ...
+  this.offset = m0;
+  this.note = ...
+  this.vel = ...
+  this.cc = ...
+  this.ccVal = ...
+  this.pitch = ...
+)
+
+function ms()
+(
+  a = this.offset;
+  b = ...
+  c = ...
+  d = ...
+  midisend(a, b, c, d);
+)

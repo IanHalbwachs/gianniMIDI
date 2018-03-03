@@ -1,0 +1,37 @@
+@init
+
+function mo(m0, m1, m23)
+(
+  status = m1;
+
+  statusHi = (m1 / 16) | 0;
+  statusLo = m1 - (statusHi * 16);     
+
+  data2 = (m23 / 256) | 0;
+  data1 = m23 - (data2 * 256);
+
+  this.chan = m1 & 0x0f;
+  this.offset = m0;
+  this.note = (statusHi == 9 || statusHi == 8) ? data1 : -1;
+  this.vel = statusHi == 9 ? data2 :
+    statusHi == 8 ? 0 : -1;
+  this.cc = statusHi == 11 ? data1 : -1;
+  this.ccVal = statusHi == 11 ? data2 : -1;
+  // this.ccVal = ...
+  // this.pitch = ...
+)
+
+// function ms()
+// (
+//   a = this.offset;
+//   b = ...
+//   c = ...
+//   d = ...
+//   midisend(a, b, c, d);
+// )
+
+// statNoteOff  = $x80;
+// statNoteOn  = $x90;
+// statPitch  = $xE0;
+// pitchCentre = 16384;
+//     status = msg1 & $xF0;
