@@ -1,4 +1,4 @@
-desc: ian figures it outt
+desc: gianniMIDI note off eater
 
 in_pin:none
 out_pin:none
@@ -20,7 +20,7 @@ while (midirecv(offset, msg1, msg23))
   status = msg1;
 
   statusHi = (msg1 / 16) | 0;
-  statusLo = msg1 - (statusHi * 16);     
+  statusLo = msg1 - (statusHi * 16);
 
   data2 = (msg23 / 256) | 0;
   data1 = msg23 - (data2 * 256);
@@ -37,8 +37,8 @@ while (midirecv(offset, msg1, msg23))
       You could reassemble the message like this.
       msg1 = (statusHi * 16 + statusLo) | 0;
       msg23 = (data2 * 256 + data1) | 0;
-      */
-  midisend(offset, ((statusHi * 16 + statusLo) | 0), ((data2 * 256 + data1) | 0));
+       */
+  derp.vel ? midisend(offset, ((statusHi * 16 + statusLo) | 0), ((data2 * 256 + data1) | 0));
 );
 // pseudo code:
 

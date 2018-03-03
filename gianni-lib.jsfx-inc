@@ -1,37 +1,28 @@
 @init
 
-function mo(m0, m1, m23)
+function get(m0, m1, m2, m3)
 (
-  status = m1;
-
-  statusHi = (m1 / 16) | 0;
-  statusLo = m1 - (statusHi * 16);     
-
-  data2 = (m23 / 256) | 0;
-  data1 = m23 - (data2 * 256);
-
-  this.chan = m1 & 0x0f;
   this.offset = m0;
-  this.note = (statusHi == 9 || statusHi == 8) ? data1 : -1;
-  this.vel = statusHi == 9 ? data2 :
-    statusHi == 8 ? 0 : -1;
-  this.cc = statusHi == 11 ? data1 : -1;
-  this.ccVal = statusHi == 11 ? data2 : -1;
-  // this.ccVal = ...
-  // this.pitch = ...
+
+  // some 8 bit number
+  this.status = m1;
+  // shift away lowest 4 bits: 1111???? -> 1111
+  this.statusHi = m1 >> 4;
+  // mask top 4 bits: ????1010 & 00001111 -> 00001010
+  this.statusLo = m1 & 15;
+
+  this.data1 = m2;
+  this.data2 = m3;
+);
+
+function send()
+(
+  midisend(
+    this.offset,
+    // reconstruct status by shifting high bits back to the left
+    // 1111 -> 11110000
+    ((this.statusHi << 4) + this.statusLo),
+    this.data1,
+    this.data2
+  );
 )
-
-// function ms()
-// (
-//   a = this.offset;
-//   b = ...
-//   c = ...
-//   d = ...
-//   midisend(a, b, c, d);
-// )
-
-// statNoteOff  = $x80;
-// statNoteOn  = $x90;
-// statPitch  = $xE0;
-// pitchCentre = 16384;
-//     status = msg1 & $xF0;

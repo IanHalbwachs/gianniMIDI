@@ -1,4 +1,4 @@
-desc: gianni note on probablility
+desc: gianniMIDI note on probablility
 
 in_pin:none
 out_pin:none
@@ -21,7 +21,7 @@ while (midirecv(offset, msg1, msg23))
       msg1 = (statusHi * 16 + statusLo) | 0;
       msg23 = (data2 * 256 + data1) | 0;
        */
-  derp.note < 1 || (slider1 > rand(100)) ? 
+  derp.note < 1 || (slider1 > rand(100)) ?
     midisend(offset, ((statusHi * 16 + statusLo) | 0), ((data2 * 256 + data1) | 0));
 );
 // pseudo code:
