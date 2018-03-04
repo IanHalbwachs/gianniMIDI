@@ -1,0 +1,17 @@
+desc: naive clock
+in_pin:none
+out_pin:none
+
+@init
+sample = 0;
+tick = 0
+
+@block
+
+@sample
+play_state == 1 && 
+(
+  sample == 48000 && sample = 0;
+  !sample && second += 1;
+  sample += 1; 
+)

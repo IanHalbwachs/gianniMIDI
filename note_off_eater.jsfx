@@ -7,7 +7,7 @@ import gianni-lib.jsfx-inc
 
 @init
 
-@sample
+@block
 
 while (midirecv(m0, m1, m2, m3))
 (
