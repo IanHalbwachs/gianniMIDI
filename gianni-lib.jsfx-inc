@@ -4,7 +4,7 @@ function get(m0, m1, m2, m3)
 (
   this.offset = m0;
 
-  // m1 = status byte, some 8 bit numberm;
+  // m1 = status byte, some 8 bit number;
   // shift away lowest 4 bits: 1111???? -> 1111
   this.statusHi = m1 >> 4;
   // mask top 4 bits: ????1010 & 00001111 -> 00001010

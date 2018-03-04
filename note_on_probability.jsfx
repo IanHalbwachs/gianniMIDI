@@ -1,0 +1,19 @@
+desc: gianniMIDI note on probablility
+
+in_pin:none
+out_pin:none
+
+slider1:0<0,100,1>probablility
+
+import gianni-lib.jsfx-inc
+
+@init
+
+@block
+
+while (midirecv(m0, m1, m2, m3))
+(
+  msg.get(m0, m1, m2, m3);
+  msg.statusHi != 9 ? msg.send() :
+    (rand(100) <= slider1) ? msg.send();
+);
