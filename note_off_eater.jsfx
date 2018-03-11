@@ -9,8 +9,7 @@ import gianni-lib.jsfx-inc
 
 @block
 
-while (midirecv(m0, m1, m2, m3))
+while (msg.recv())
 (
-  msg.get(m0, m1, m2, m3);
-  msg.statusHi != 8 && msg.send(); 
+  msg.statusHi != 8 && msg.send();
 );

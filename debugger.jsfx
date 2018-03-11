@@ -16,10 +16,8 @@ import gianni-lib.jsfx-inc
 
 @block
 
-while (midirecv(a0, a1, a2, a3))
+while (msg.recv())
 (
-  msg.get(a0, a1, a2, a3);
-
   slider1 = msg.offset;
   slider2 = (msg.statusHi << 4) + msg.statusLo;
   slider3 = msg.statusHi;

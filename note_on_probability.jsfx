@@ -11,9 +11,8 @@ import gianni-lib.jsfx-inc
 
 @block
 
-while (midirecv(m0, m1, m2, m3))
+while (msg.recv())
 (
-  msg.get(m0, m1, m2, m3);
   msg.statusHi != 9 ? msg.send() :
     (rand(100) <= slider1) ? msg.send();
 );
