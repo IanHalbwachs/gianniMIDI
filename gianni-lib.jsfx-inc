@@ -1,6 +1,10 @@
 @init
 
 
+function randInt(num) (
+  floor(rand(num) + 0.5);
+);
+
 // wrap midirecv and interpret values
 // usage: while(msg.recv()) (msg.send())
 function recv()
@@ -33,3 +37,13 @@ function send()
     this.data2
   );
 )
+
+function isNoteOn()
+(
+  this.statusHi == 9;
+);
+
+function isNoteOff()
+(
+  this.statusHi == 8;
+);

@@ -13,6 +13,6 @@ import gianni-lib.jsfx-inc
 
 while (msg.recv())
 (
-  msg.statusHi != 9 ? msg.send() :
+  !msg.isNoteOn() ? msg.send() :
     (rand(100) <= slider1) ? msg.send();
 );

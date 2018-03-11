@@ -11,5 +11,5 @@ import gianni-lib.jsfx-inc
 
 while (msg.recv())
 (
-  msg.statusHi != 8 && msg.send();
+  !msg.isNoteOff() && msg.send();
 );

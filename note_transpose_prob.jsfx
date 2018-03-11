@@ -1,0 +1,52 @@
+desc: gianniMIDI transpose probability
+
+in_pin:none
+out_pin:none
+
+slider1:0<-12,12,1>interval A
+slider2:0<-12,12,1>interval B
+slider3:0<0,100,1>probability
+
+import gianni-lib.jsfx-inc
+
+@init
+
+ledger.length = 0;
+
+function transpose(interval)
+(
+  note = this.data1;
+  transposed = note + interval;
+  transposed > 127 ? transposed -= 12;
+  transposed < 0 ? transposed += 12;
+  ledger[note] = transposed;
+  this.data1 = transposed;
+  ledger.length += 1;
+);
+
+function setOffNote()
+(
+  ledger.length ?
+  (
+    transposed = ledger[this.data1];
+    transposed ? (
+      ledger[this.data1] = 0;
+      ledger.length -= 1;
+      this.data1 = transposed;
+    );
+  );
+);
+
+@block
+
+while (msg.recv())
+(
+  msg.isNoteOn() && (rand(100) <= slider3) &&
+  (
+    // if interval B is assigned, flip a coin, else use interval A
+    msg.transpose((slider2 && randInt(1)) ? slider2 : slider1);
+  );
+  msg.isNoteOff() && msg.setOffNote();
+  msg.send();
+);
+
