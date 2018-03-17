@@ -1,0 +1,92 @@
+desc:gianniMIDI random note cluster
+
+slider1:24<1,127,1>low note
+slider2:60<1,127,1>high note
+slider3:4<1,16,1># notes
+//slider3:4<1,16,1>max notes
+//slider4:1<1,16,1>min notes
+//slider5:.7<0,1,.1>tendency: min<max
+//slider6:1<1,16,1>channels (1 to n)
+//slider7:1<0,1,1>channel order: random||iterate
+
+import gianni-lib.jsfx-inc
+
+@init
+
+range = slider2-slider1;
+held = 0;
+held.length = 0;
+holding = -128;
+
+function sendNoteOn(notechan)
+(
+  note = notechan>>4;
+  chan = notechan - note<<4;
+  midisend(0, 9<<4 + chan, note, 100);
+);
+
+function sendNoteOff(notechan)
+(
+  note = notechan>>4;
+  chan = notechan - note<<4;
+  midisend(0, 8<<4 + chan, note, 0);
+);
+
+function onNewNote()
+(
+  held.length=/*randInt(slider3-1)+1*/slider3;
+  while (i < held.length)
+  (
+    note = slider1 + randInt(range);
+    chan = 0;
+    vel = 100;
+    held[i] = note<<4 + chan;
+    midisend(0, 9<<4 + chan, note, vel);
+    i += 1;
+  );
+  i = 0;
+);
+
+function onRepeatNote()
+(
+  while (i < held.length)
+  (
+    sendNoteOn(held[i]);
+    i += 1;
+  );
+  i = 0;
+);
+
+function onEndNote()
+(
+  while (i < held.length)
+  (
+    sendNoteOff(held[i]);
+    i += 1;
+  );
+  i = 0;
+);
+
+
+@slider
+// sanitize
+
+@sample
+
+while(msg.recv())
+(
+  isPlaying = holding > 0;
+  isNewNote = msg.note() != -holding;
+
+  msg.isNoteOn() && !isPlaying &&
+  (
+    holding = msg.note();
+    isNewNote ? onNewNote() : onRepeatNote();
+  );
+
+  msg.isNoteOff() && msg.note() == holding &&
+  (
+    holding = -holding;
+    onEndNote();
+  );
+);

@@ -1,0 +1,35 @@
+desc: gianniMIDI wtf
+
+in_pin:none
+out_pin:none
+
+slider1:0<0,128,1>offset
+slider2:0<0,127,1>status
+slider3:0<0,127,1>status hi
+slider4:0<0,127,1>status lo
+slider5:0<0,127,1>data1
+slider6:0<0,127,1>data2
+slider7:0<0,12,1>modulo12
+
+import gianni-lib.jsfx-inc
+
+@init
+arr=0;
+arr[0]=10;
+done=0;
+
+orZero = -1 | 0;
+
+@block
+
+while (msg.recv() && !done)
+(
+  slider1 = msg.offset;
+  slider2 = (msg.statusHi << 4) + msg.statusLo;
+  slider3 = msg.statusHi;
+  slider4 = msg.statusLo;
+  slider5 = msg.data1;
+  slider6 = msg.data2;
+  (msg.statusHi == 9) && slider7 = msg.data1%12;
+  msg.send();
+);
