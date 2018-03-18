@@ -1,7 +1,13 @@
 @init
 
+function round(num)
+(
+  floor(num + 0.5);
+);
 
-function randInt(num) (
+
+function randInt(num)
+(
   floor(rand(num) + 0.5);
 );
 

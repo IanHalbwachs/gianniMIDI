@@ -69,6 +69,7 @@ function onEndNote()
 
 
 @slider
+range = slider2-slider1
 // sanitize
 
 @sample
