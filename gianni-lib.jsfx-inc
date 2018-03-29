@@ -1,6 +1,6 @@
 @init
 
-
+//* MATH *//
 function round(num)
 (
   floor(num + 0.5);
@@ -42,6 +42,8 @@ function writeBits(nBits, offset, num)
   // foo.readBits(3, 6) = 010 = 2
 );
 
+
+//* MIDI *//
 
 // wrap midirecv and interpret values
 // usage: while(msg.recv()) (msg.send())
@@ -93,4 +95,17 @@ function isNoteOff()
 function note()
 (
   this.data1;
+);
+
+
+//* TIME *//
+
+function samplesPerBar() // samples per bar
+(
+  // ts_num ts_denoms in a bar (4 quarter notes)
+  // tempo ts_denoms in a minute (120 quarter notes)
+  // duration of 1 bar in minutes = ts_num / tempo -> 4/120 = 0.0333...
+  // duration of 1 bar in seconds = ts_num * 60 / tempo -> 4*60/120 = 2
+  // duration of 1 bar in samples = srate * ts_num * 60 / tempo -> 48000 * 2
+  srate * ts_num * 60 / tempo;
 );
