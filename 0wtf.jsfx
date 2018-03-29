@@ -14,15 +14,13 @@ slider7:0<0,12,1>modulo12
 import gianni-lib.jsfx-inc
 
 @init
-arr=0;
-arr[0]=10;
-done=0;
 
-orZero = -1 | 0;
+val.writeBits(3,2, 7);
+out = val.readBits(3,0);
 
 @block
 
-while (msg.recv() && !done)
+while (msg.recv())
 (
   slider1 = msg.offset;
   slider2 = (msg.statusHi << 4) + msg.statusLo;

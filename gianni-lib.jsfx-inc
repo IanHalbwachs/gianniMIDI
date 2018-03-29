@@ -1,5 +1,6 @@
 @init
 
+
 function round(num)
 (
   floor(num + 0.5);
@@ -8,29 +9,61 @@ function round(num)
 
 function randInt(num)
 (
-  floor(rand(num) + 0.5);
+  round(rand(num));
 );
+
+
+function mask(n)
+(
+  pow(2, n)-1;
+);
+
+
+// foo.readBits(3, 6) will read bits 7 thru 9 as if they were their own 3-bit integer
+function readBits(nBits, offset)
+(
+  // foo.value = 1101000000
+  // shifted right 6 bits = 1101
+  // 1101 masked by 111 = 0101 -> 5
+  (this.value>>offset) & mask(nBits);
+);
+
+
+// foo.writeBits(3, 6, 2) will write the number 2 into bits 7 thru 9
+// (num must fit in numBits else good luck using this as intended)
+function writeBits(nBits, offset, num)
+(
+  // subtract whatever value is in there
+  // foo.value = 1111111111 - ([bits 789] << 6) = 1000111111
+  this.value -= this.readBits(nBits, offset) << offset;
+  // add num back into that n bit hole
+  // foo.value = 1000111111 + (10 << 6) = 1010111111
+  this.value += num << offset;
+  // foo.readBits(3, 6) = 010 = 2
+);
+
 
 // wrap midirecv and interpret values
 // usage: while(msg.recv()) (msg.send())
-function recv()
+function recv() local(received)
 (
   //capture return value of midirecv and scope its args
-  got = midirecv(m0, m1, m2, m3);
-  got ? (
+  received = midirecv(m0, m1, m2, m3);
+  received ? (
     this.offset = m0;
     // m1 = status byte, some 8 bit number;
     // shift away lowest 4 bits: 1111???? -> 1111
     this.statusHi = m1 >> 4;
     // mask top 4 bits: ????1010 & 00001111 -> 00001010
-    this.statusLo = m1 & 15;
+    this.statusLo = m1 & $~4;
     this.data1 = m2;
     this.data2 = m3;
   );
   // return 1 or 0 for while() evaluation;
-  got;
+  received;
 
 );
+
 
 function send()
 (
@@ -44,15 +77,18 @@ function send()
   );
 );
 
+
 function isNoteOn()
 (
   this.statusHi == 9;
 );
 
+
 function isNoteOff()
 (
   this.statusHi == 8;
 );
+
 
 function note()
 (
