@@ -42,9 +42,6 @@ function calcShape(shape) local(phase, output)
 
 heldNotes = 0;
 sCount = 0;
-running = 0;
-setPeriod();
-
 
 @slider
 
@@ -55,6 +52,7 @@ setPeriod();
 
 while (msg.recv())
 (
+  !period && setPeriod(); // samplesPerBar (tempo and ts_num) regrettably not available in @init
   msg.isNoteOn() && heldNotes += 1;
   msg.isNoteOff() && heldNotes -=1;
   msg.send();
