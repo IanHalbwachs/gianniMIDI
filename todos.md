@@ -1,6 +1,8 @@
+* balance() fn for when counting samples + period is non-integer -> period.balance() would return floor or ceil depending on some logic
+
 * randInt should take two arguments // should it really though?
  
-~* need some custom bitwise functions ie. <1011010101>.get(<bits two thru four>)~
+~need some custom bitwise functions ie. <1011010101>.get(<bits two thru four>)~
 
 * keyrange controlled LFO
 
