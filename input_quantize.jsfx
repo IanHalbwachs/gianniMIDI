@@ -11,40 +11,39 @@ import gianni-lib.jsfx-inc
 @init
 
 queuedNoteOns = 0;
-qnons.len = 0;
+queuedNoteOnsLen = 0;
 period = 0;
 sCount = 0;
 
-function enq() local (bits)
+function enq()
 (
-  bits.writeBits(0, 4, this.statusLo);
+  bits.value = 0;
+  bits.writeBits(4, 0, this.statusLo);
   bits.writeBits(4, 4, this.statusHi);
-  bits.writeBits(8, 7, this.data1);
-  bits.writeBits(15, 7, this.data2);
-  queuedNoteOns[qnons.len] = bits;
-  qnons.len += 1;
+  bits.writeBits(7, 8, this.data1);
+  bits.writeBits(7, 15, this.data2);
+  queuedNoteOns[queuedNoteOnsLen] = bits.value;
+  queuedNoteOnsLen += 1;
 );
 
-function deq(index) local (bits)
+function deq(index)
 (
-  bits = queuedNoteOns[index];
+  bits.value = queuedNoteOns[index];
   midisend(
     0,
-    bits.readBits(0, 8),
-    bits.readBits(8, 7),
-    bits.readBits(15, 7)
+    bits.readBits(8, 0),
+    bits.readBits(7, 8),
+    bits.readBits(15, 8)
   );
   queuedNoteOns[index] = 0;
 );
 
-function release()
+function releaseQueuedNoteOns()
 (
-  
-  while(qnons.len)
+  while(queuedNoteOnsLen > 0)
   (
-    qnons.len -= 1;
-    deq(qnons.len);
-    
+    queuedNoteOnsLen -= 1;
+    deq(queuedNoteOnsLen);
   );
 );
 
@@ -71,8 +70,8 @@ while (msg.recv())
     handled = 1;
     slider2 == 1 && msg.send()
   ) ;
-  !handled && mesg.send();
+  !handled && msg.send();
 );
 sCount += 1;
-sCount == period && sCount = 0;
-!sCount && release();
+sCount >= period && sCount = 0;
+sCount == 0 && releaseQueuedNoteOns();
