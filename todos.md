@@ -1,4 +1,6 @@
-* balance() fn for when counting samples + period is non-integer -> period.balance() would return floor or ceil depending on some logic
+* nrpn -> slider fx
+
+* balance() fn for when counting samples + period is non-integer -> period.balance() would return floor or ceil depending on some logic // if you're running into trouble syncing samples to beat positions you should probably be using bpos - maybe possible to have a sync/playstate-aware phase fn?
 
 * randInt should take two arguments // should it really though?
  

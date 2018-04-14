@@ -4,46 +4,96 @@ in_pin:none
 out_pin:none
 
 slider1:16<1,16,1>quantize interval (bar/n)
-slider2:0<0,2,1{no (good for one-shots),unquantised (short notes may never play),smart quantized (min duration of 1 interval}>send note offs 
+
+slider2:0<0,2,1{don't (good for one-shots),unquantized (note on & offs received within the same interval will not play),quantized (note on & offs received within the same interval will not play))}>send note offs 
+slider3:0<0,100,1>debug
 
 import gianni-lib.jsfx-inc
 
 @init
 
-queuedNoteOns = 0;
-queuedNoteOnsLen = 0;
+onQueue = 0;
+onTail = 0;
+
+offQueue = 127;
+offTail = 0;
+
+// we will need a clock if we want this to work when stopped
+// TODO: use beatpos when playing, handoff to clock on stop / reset on start
 period = 0;
 sCount = 0;
 
-function enq()
+// msg methods
+function enqNoteOn()
 (
-  bits.value = 0;
-  bits.writeBits(4, 0, this.statusLo);
-  bits.writeBits(4, 4, this.statusHi);
-  bits.writeBits(7, 8, this.data1);
-  bits.writeBits(7, 15, this.data2);
-  queuedNoteOns[queuedNoteOnsLen] = bits.value;
-  queuedNoteOnsLen += 1;
+  val = 0;
+  val.writeBits(0, 4, this.statusLo);
+  val.writeBits(4, 4, this.statusHi);
+  val.writeBits(8, 7, this.data1);
+  val.writeBits(15, 7, this.data2);
+  onQueue[onTail] = val;
+  onTail += 1;
 );
 
-function deq(index)
+function cancelNoteOn(index)
 (
-  bits.value = queuedNoteOns[index];
-  midisend(
-    0,
-    bits.readBits(8, 0),
-    bits.readBits(7, 8),
-    bits.readBits(15, 8)
-  );
-  queuedNoteOns[index] = 0;
+  onQueue[index] = 0;
 );
 
-function releaseQueuedNoteOns()
+function enqNoteOff()
 (
-  while(queuedNoteOnsLen > 0)
+  val = 0;
+  val.writeBits(0, 4, this.statusLo);
+  val.writeBits(4, 4, this.statusHi);
+  val.writeBits(8, 7, this.data1);
+  val.writeBits(15, 7, this.data2);
+  offQueue[offTail] = val;
+  offTail += 1;
+);
+
+
+function posInQueue()
+( 
+  val = -1;
+  i = 0;
+  while((val == -1) && (i < onTail))
   (
-    queuedNoteOnsLen -= 1;
-    deq(queuedNoteOnsLen);
+    compare = onQueue[i];
+    (this.statusLo == compare.readBits(0, 4)) && (this.data1 == compare.readBits(8, 7)) && val = i;
+    i += 1;
+  );
+  val;
+);
+
+// global methods
+function sendFromQueue(queue, index)
+(
+  val = queue[index];
+  val && midisend(
+    0,
+    val.readBits(0, 8),
+    val.readBits(8, 7),
+    val.readBits(15, 7)
+  );
+  queue[index] = 0;
+);
+
+function sendQueuedNoteOns()
+(
+  while(onTail > 0)
+  (
+    onTail -= 1;
+    sendFromQueue(onQueue, onTail);
+  );
+);
+
+function sendQueuedNoteOffs()
+(
+  count += 1;
+  while (offTail > 0)
+  (
+    offTail -= 1;
+    sendFromQueue(offQueue, offTail);
   );
 );
 
@@ -62,16 +112,22 @@ while (msg.recv())
   handled = 0;
   msg.isNoteOn() &&
   (
+    (msg.posInQueue() < 0) && msg.enqNoteOn();
     handled = 1;
-    msg.enq();
   );
   msg.isNoteOff() &&
   (
+    slider2 > 0 && (
+      pos = msg.posInQueue();
+      pos > -1 ? cancelNoteOn(pos) : (slider2 == 1 ? msg.send() : msg.enqNoteOff());
+    );
     handled = 1;
-    slider2 == 1 && msg.send()
-  ) ;
+  );
   !handled && msg.send();
 );
 sCount += 1;
 sCount >= period && sCount = 0;
-sCount == 0 && releaseQueuedNoteOns();
+sCount == 0 && (
+  sendQueuedNoteOns();
+  slider2 == 2 && sendQueuedNoteOffs();
+)

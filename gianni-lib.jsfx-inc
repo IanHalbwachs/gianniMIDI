@@ -18,27 +18,25 @@ function mask(n)
   pow(2, n)-1;
 );
 
-
-// foo.readBits(3, 6) will read bits 7 thru 9 as if they were their own 3-bit integer
-function readBits(nBits, offset)
+// foo.readBits(6, 3) will read bits 7 thru 9 as if they were their own 3-bit integer
+function readBits(offset, nBits)
 (
-  // foo.value = 1101000000
+  // foo = 1101111111
   // shifted right 6 bits = 1101
   // 1101 masked by 111 = 0101 -> 5
-  (this.value>>offset) & mask(nBits);
+  (this >> offset) & mask(nBits);
 );
 
-
-// foo.writeBits(3, 6, 2) will write the number 2 into bits 7 thru 9
+// foo.writeBits(6, 3, 2) will write the number 2 into bits 7 thru 9
 // (num must fit in numBits else good luck using this as intended)
-function writeBits(nBits, offset, num)
+function writeBits(offset, nBits, num)
 (
-  // subtract whatever value is in there
-  // foo.value = 1111111111 - ([bits 789] << 6) = 1000111111
-  this.value -= this.readBits(nBits, offset) << offset;
+  // subtract whatever value is in those bits
+  // foo = 1111111111 - ([bits 789] << 6) = 1000111111
+  this -= this.readBits(offset, nBits) << offset;
   // add num back into that n bit hole
-  // foo.value = 1000111111 + (10 << 6) = 1010111111
-  this.value += num << offset;
+  // foo = 1000111111 + (10 << 6) = 1010111111
+  this += num << offset;
   // foo.readBits(3, 6) = 010 = 2
 );
 
