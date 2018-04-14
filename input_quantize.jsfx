@@ -35,10 +35,12 @@ function enqNoteOn()
   onTail += 1;
 );
 
+
 function cancelNoteOn(index)
 (
   onQueue[index] = 0;
 );
+
 
 function enqNoteOff()
 (
@@ -78,6 +80,7 @@ function sendFromQueue(queue, index)
   queue[index] = 0;
 );
 
+
 function sendQueuedNoteOns()
 (
   while(onTail > 0)
@@ -86,6 +89,7 @@ function sendQueuedNoteOns()
     sendFromQueue(onQueue, onTail);
   );
 );
+
 
 function sendQueuedNoteOffs()
 (
@@ -128,6 +132,6 @@ while (msg.recv())
 sCount += 1;
 sCount >= period && sCount = 0;
 sCount == 0 && (
-  sendQueuedNoteOns();
   slider2 == 2 && sendQueuedNoteOffs();
-)
+  sendQueuedNoteOns();
+);
