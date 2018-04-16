@@ -23,7 +23,7 @@ function readBits(offset, nBits)
 (
   // foo = 1101111111
   // shifted right 6 bits = 1101
-  // 1101 masked by 111 = 0101 -> 5
+  // 1101 masked by 111 = 0101 = 5
   (this >> offset) & mask(nBits);
 );
 
@@ -32,14 +32,56 @@ function readBits(offset, nBits)
 function writeBits(offset, nBits, num)
 (
   // subtract whatever value is in those bits
-  // foo = 1111111111 - ([bits 789] << 6) = 1000111111
+  // 1XXX111111 -= (XXX << 6) = 1000111111
   this -= this.readBits(offset, nBits) << offset;
   // add num back into that n bit hole
-  // foo = 1000111111 + (10 << 6) = 1010111111
+  // 1000111111 + (2 << 6) = 1010111111
   this += num << offset;
-  // foo.readBits(3, 6) = 010 = 2
+  // -> foo.readBits(3, 6) = 010 = 2
 );
 
+
+// * ARRAYS *//
+
+//tenSizeArray.arrayInit(10); 
+function arrayInit(size) local (index)
+(
+  index = _nextArrayIdx; // _nextArrayIdx will be globally initialized at 0 on first call;
+  _nextArrayIdx = index + size; // set up index for next call
+  this = index;
+  this.size = size;
+  this.len = 0;
+);
+
+// tenSizeArray.push(foo)
+function push(value)
+(
+  this.len < this.size && (
+    this[this.len] = value;
+    this.len += 1;
+  );
+);
+
+// tenSizeArray.pop()
+function pop() local (return)
+(
+  this.len > 0 && (
+    this.len -=1;
+    return = this[this.len];
+  );
+  return; // 😒 local vars persist, so popping from an empty array will reliably produce spurious values.
+);        // there's no return value we could use to reliably indicate "was empty" so we won't bother reassigning.
+
+function find(value) local (return, i)
+(
+  return = -1;
+  while ((return == -1) && (i < this.len))
+  (
+    value == this[i] && return = i;
+    i += 1;
+  );
+  return; // nb. value may exist at more than 1 index, this will only return the first.
+);
 
 //* MIDI *//
 
@@ -97,12 +139,12 @@ function note()
 
 //* TIME *//
 
-function samplesPerBar() // samples per bar
+function samplesPerBar() // nb. may be non-integer
 (
   // ts_num ts_denoms in a bar (4 quarter notes)
   // tempo ts_denoms in a minute (120 quarter notes)
   // duration of 1 bar in minutes = ts_num / tempo -> 4/120 = 0.0333...
-  // duration of 1 bar in seconds = ts_num * 60 / tempo -> 4*60/120 = 2
-  // duration of 1 bar in samples = srate * ts_num * 60 / tempo -> 48000 * 2
+  // duration of 1 bar in seconds = 60 * ts_num / tempo -> 4*60/120 = 2
+  // duration of 1 bar in samples = srate * 60 * ts_num / tempo) -> 48000 * 2
   srate * ts_num * 60 / tempo;
 );

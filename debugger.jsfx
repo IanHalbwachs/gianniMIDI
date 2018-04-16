@@ -14,7 +14,14 @@ import gianni-lib.jsfx-inc
 
 @init
 
-@block
+someArray.arrayInit(10);
+
+someArray.push(5);
+someArray.push(6);
+
+where = someArray.find(5);
+where1 = someArray.find(6);
+
 
 while (msg.recv())
 (
@@ -27,4 +34,3 @@ while (msg.recv())
 
   msg.send();
 );
-
