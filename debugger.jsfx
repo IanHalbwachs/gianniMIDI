@@ -12,16 +12,7 @@ slider6:0<0,127,1>data2
 
 import gianni-lib.jsfx-inc
 
-@init
-
-someArray.arrayInit(10);
-
-someArray.push(5);
-someArray.push(6);
-
-where = someArray.find(5);
-where1 = someArray.find(6);
-
+@block
 
 while (msg.recv())
 (

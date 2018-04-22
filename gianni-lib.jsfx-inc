@@ -69,12 +69,13 @@ function pop() local (return)
     this.len -=1;
     return = this[this.len];
   );
-  return; // 😒 local vars persist, so popping from an empty array will reliably produce spurious values.
+  return; // 😒 local vars persist, so popping from an empty array will likely produce spurious values.
 );        // there's no return value we could use to reliably indicate "was empty" so we won't bother reassigning.
 
 function find(value) local (return, i)
 (
   return = -1;
+  i = 0;
   while ((return == -1) && (i < this.len))
   (
     value == this[i] && return = i;
@@ -135,6 +136,32 @@ function note()
 (
   this.data1;
 );
+
+
+function isCC()
+(
+  this.statusHi == 11;
+);
+
+// usage: msg.recv(),
+// x = msg.toBits() -> now x is a simple number you can store in an array or whatever
+function toBits()
+(
+  this.statusHi << 18 +
+  this.statusLo << 14 +
+  this.data1 << 7 +
+  this.data2;
+);
+// x.parseBits() -> now x is still a number but has msg properties as well
+// x.send();
+function parseBits()
+(
+  this.statusHi = this.readBits(18, 4);
+  this.statusLo = this.readBits(14, 4);
+  this.data1 = this.readBits(7, 7);
+  this.data2 = this.readBits(0, 7);
+);
+// ^^ nb. you can mutate x.foo then call x = x.toBits() again if need be
 
 
 //* TIME *//

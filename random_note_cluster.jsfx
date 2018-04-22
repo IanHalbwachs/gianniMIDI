@@ -11,83 +11,115 @@ slider3:4<1,16,1># notes
 
 import gianni-lib.jsfx-inc
 
+
 @init
 
+function isTriggerNote()
+(
+  this.note() == 0;
+);
+
+/* unused, for reference
+
+  function isNewClusterNote()
+  (
+   this.note() == 1;
+  );
+
+*/
+
+function shouldPassThrough() local (s, d)
+( 
+  // we'll use more performant comparators for high volume
+  s = this.statusHi;
+  d = this.data1;                                        
+  (s != 8 && s != 9) ||  // pass trough if msg is neither note on or off
+  ((s == 8 || s == 9) && (d != 0 && d != 1));  // pass through if msg is note but not trigger or new cluster
+);
+
+
+function newCluster()
+(
+  loop(
+    cluster.len,
+    cluster.pop(); // clear previous cluster
+  );
+  loop(
+    slider3,
+    (
+      // default to 0 for statusLo (channel) and data2 (vel), will be determined by trigger note
+      msgNC.statusHi = 9;
+      msgNC.data1 = slider1 + randInt(range);
+      cluster.push(msgNC.toBits();)
+    );
+  );
+);
+
+
+function sendNoteOns(chan, vel) local(i)
+(
+  i = 0;
+  while(i < cluster.len)
+  (
+    msgON = cluster[i];
+    msgON.parseBits();
+    msgON.statusLo = chan;
+    msgON.data2 = vel;
+    msgON.send();
+    i += 1;
+  );
+);
+
+
+function sendNoteOffs() local(i)
+(
+  i = 0;
+  while (i < cluster.len)
+  (
+    msgOFF = cluster[i];
+    msgOFF.parseBits();
+    msgOFF.statusHi = 8;
+    msgOFF.statusLo = playingOnChannel;
+    msgOFF.send();
+    i += 1;
+  );
+);
+
+
 range = slider2-slider1;
-held = 0;
-held.length = 0;
-holding = -128;
+playingOnChannel = -1;
+cluster.arrayInit(16);
+newCluster();
 
-function sendNoteOn(notechan)
-(
-  note = notechan>>4;
-  chan = notechan - note<<4;
-  midisend(0, 9<<4 + chan, note, 100);
-);
-
-function sendNoteOff(notechan)
-(
-  note = notechan>>4;
-  chan = notechan - note<<4;
-  midisend(0, 8<<4 + chan, note, 0);
-);
-
-function onNewNote()
-(
-  held.length=/*randInt(slider3-1)+1*/slider3;
-  while (i < held.length)
-  (
-    note = slider1 + randInt(range);
-    chan = 0;
-    vel = 100;
-    held[i] = note<<4 + chan;
-    midisend(0, 9<<4 + chan, note, vel);
-    i += 1;
-  );
-  i = 0;
-);
-
-function onRepeatNote()
-(
-  while (i < held.length)
-  (
-    sendNoteOn(held[i]);
-    i += 1;
-  );
-  i = 0;
-);
-
-function onEndNote()
-(
-  while (i < held.length)
-  (
-    sendNoteOff(held[i]);
-    i += 1;
-  );
-  i = 0;
-);
-
-
-@slider
-range = slider2-slider1
-// sanitize
 
 @sample
 
-while(msg.recv())
+while (msg.recv())
 (
-  isPlaying = holding > 0;
-  isNewNote = msg.note() != -holding;
-
-  msg.isNoteOn() && !isPlaying &&
-  (
-    holding = msg.note();
-    isNewNote ? onNewNote() : onRepeatNote();
-  );
-
-  msg.isNoteOff() && msg.note() == holding &&
-  (
-    holding = -holding;
-    onEndNote();
-  );
+  msg.shouldPassThrough() ? msg.send() :
+    (
+      msg.isNoteOn() ?
+      (
+        msg.isTriggerNote() ?
+          (
+            playingOnChannel == -1 &&
+            (
+              playingOnChannel = msg.statusLo;
+              sendNoteOns(playingOnChannel, msg.data2);
+            ) 
+          ) 
+            : // msg.isNewClusterNote
+          ( 
+            playingOnChannel == -1 && newCluster();
+          );
+      )
+        :  // msg.isNoteOff, ignore newClusterNote
+      ( 
+        msg.isTriggerNote() &&
+        (
+          sendNoteOffs();
+          playingOnChannel = -1;
+        );
+      );
+    );
 );
