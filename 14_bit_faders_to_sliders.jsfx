@@ -22,6 +22,14 @@ function isMSB()
   this.data1 < 32 || (this.data1 > 63 && this.data1 < 96);
 );
 
+function sanitizeNoteOffs()
+(
+  this.statusHi == 9 && this.data2 == 0 &&
+  (
+    this.statusHi = 8;
+  );
+);
+
 MSB.arrayInit(32);
 LSB.arrayInit(32);
 
@@ -37,6 +45,7 @@ while (i < 32)
 
 while (msg.recv())
 (
+  msg.sanitizeNoteOffs();
   !msg.isCC() ? msg.send() :
   (
     msg.isMSB() ?
