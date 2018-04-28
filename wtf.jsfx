@@ -1,0 +1,29 @@
+desc: gianniMIDI ~wtf
+
+in_pin:none
+out_pin:none
+
+slider1:0<0,128,1>offset
+slider2:0<0,127,1>status
+slider3:0<0,127,1>status hi
+slider4:0<0,127,1>status lo
+slider5:0<0,127,1>data1
+slider6:0<0,127,1>data2
+
+import gianni-lib.jsfx-inc
+
+@init
+
+initTime();
+
+clock.initClock();
+clock.setPeriod(1);
+
+msg.statusHi = 9;
+msg.data1 = 60;
+msg.data2 = 100;
+
+@block
+
+clock.tick() && msg.send();
+

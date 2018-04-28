@@ -12,6 +12,19 @@ function randInt(num)
   round(rand(num));
 );
 
+function phase(elapsed, period) local(quotient, return) // phase(12, 8) = .5
+(
+  period &&
+  (
+    elapsed < period ? (return = elapsed) :
+    (
+      quotient = elapsed / period;
+      // decimal = quotient - quotient<<0
+      return = (quotient - quotient<<0) * period;
+    );
+  );
+  return;
+);
 
 function mask(n)
 (
@@ -119,6 +132,15 @@ function send()
   );
 );
 
+function sendWithOffset(offset)
+(
+  midisend(
+    offset,
+    ((this.statusHi << 4) + this.statusLo),
+    this.data1,
+    this.data2
+  )
+);
 
 function isNoteOn()
 (
@@ -144,7 +166,7 @@ function isCC()
 );
 
 // usage: msg.recv(),
-// x = msg.toBits() -> now x is a simple number you can store in an array or whatever
+// x = msg.toBits() -> now x is a number you can store in an array or whatever
 function toBits()
 (
   this.statusHi << 18 +
@@ -152,7 +174,7 @@ function toBits()
   this.data1 << 7 +
   this.data2;
 );
-// x.parseBits() -> now x is still a number but has msg properties as well
+// x.parseBits() -> x is still a number but now has msg properties as well
 // x.send();
 function parseBits()
 (
@@ -175,3 +197,57 @@ function samplesPerBar() // nb. may be non-integer
   // duration of 1 bar in samples = srate * 60 * ts_num / tempo) -> 48000 * 2
   srate * ts_num * 60 / tempo;
 );
+
+
+//* CLOCK *//
+
+// global setup
+function initTime()
+(
+  _tInit = time_precise();
+);
+
+// clock methods
+function initClock()
+(
+  this.t0 = _tInit;
+  this.prevPhase = 1; // ensure rollover on first tick
+);
+
+function setPeriodInBars(bars) // 1/16, .5 etc
+(
+  // seconds per beat = 60 / tempo
+  // seconds per bar = beats per measure * seconds per beat
+  this.period = bars * ts_denom * 60 / tempo;
+);
+
+function setPeriod(seconds)
+(
+  this.period = seconds;
+);
+
+function getPhase()
+(
+  phase((time_precise() - this.t0), this.period);
+);
+
+function tick() local (_phase, _prevPhase) // call this every sample and it will return 1 when phase rolls over
+(
+  _phase = this.getPhase();
+  _prevPhase = this.prevPhase;
+  this.prevPhase = _phase;
+  _phase < _prevPhase;
+)
+
+
+// clock.setPhase(0-1)
+// clock.getPhase() // 0-1
+// clock.setPeriod(sec)
+// clock.getPeriod() // sec
+// clock.setPeriodInBars(n)
+// clock.getPeriodInBars() // n
+// clock.pause() 
+// clock.resume()
+// clock.setRate(hz)
+// clock.getRate() //hz
+// //

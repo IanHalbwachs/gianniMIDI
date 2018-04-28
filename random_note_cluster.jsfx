@@ -19,7 +19,7 @@ function isTriggerNote()
   this.note() == 0;
 );
 
-/* unused, for reference
+/* for reference, unused
 
   function isNewClusterNote()
   (
@@ -34,7 +34,7 @@ function shouldPassThrough() local (s, d)
   s = this.statusHi;
   d = this.data1;                                        
   (s != 8 && s != 9) ||  // pass trough if msg is neither note on or off
-  ((s == 8 || s == 9) && (d != 0 && d != 1));  // pass through if msg is note but not trigger or new cluster
+  ((s == 8 || s == 9) && (d != 0 && d != 1));  // pass through if msg is note but not trigger on/off or new cluster
 );
 
 
