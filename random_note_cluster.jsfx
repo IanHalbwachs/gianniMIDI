@@ -41,7 +41,7 @@ function shouldPassThrough() local (s, d)
 function newCluster()
 (
   loop(
-    cluster.len,
+    cluster.length,
     cluster.pop(); // clear previous cluster
   );
   loop(
@@ -59,7 +59,7 @@ function newCluster()
 function sendNoteOns(chan, vel) local(i)
 (
   i = 0;
-  while(i < cluster.len)
+  while(i < cluster.length)
   (
     msgON = cluster[i];
     msgON.parseBits();
@@ -74,7 +74,7 @@ function sendNoteOns(chan, vel) local(i)
 function sendNoteOffs() local(i)
 (
   i = 0;
-  while (i < cluster.len)
+  while (i < cluster.length)
   (
     msgOFF = cluster[i];
     msgOFF.parseBits();

@@ -63,24 +63,24 @@ function arrayInit(size) local (index)
   _nextArrayIdx = index + size; // set up index for next call
   this = index;
   this.size = size;
-  this.len = 0;
+  this.length = 0;
 );
 
 // tenSizeArray.push(foo)
 function push(value)
 (
-  this.len < this.size && (
-    this[this.len] = value;
-    this.len += 1;
+  this.length < this.size && (
+    this[this.length] = value;
+    this.length += 1;
   );
 );
 
 // tenSizeArray.pop()
 function pop() local (return)
 (
-  this.len > 0 && (
-    this.len -=1;
-    return = this[this.len];
+  this.length > 0 && (
+    this.length -=1;
+    return = this[this.length];
   );
   return; // 😒 local vars persist, so popping from an empty array will likely produce spurious values.
 );        // there's no return value we could use to reliably indicate "was empty" so we won't bother reassigning.
@@ -89,7 +89,7 @@ function find(value) local (return, i)
 (
   return = -1;
   i = 0;
-  while ((return == -1) && (i < this.len))
+  while ((return == -1) && (i < this.length))
   (
     value == this[i] && return = i;
     i += 1;

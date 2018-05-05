@@ -34,7 +34,7 @@ function posInQueue() local (i, pos, comp)
 ( 
   pos = -1;
   i = 0;
-  while((pos == -1) && (i < onQueue.len))
+  while((pos == -1) && (i < onQueue.length))
   (
     comp = onQueue[i];
     comp.parseBits();
@@ -47,7 +47,7 @@ function posInQueue() local (i, pos, comp)
 // global methods
 function dequeue(queue*)
 (
-  while(queue.len > 0)
+  while(queue.length > 0)
   (
     _m = queue.pop();
     _m.parseBits();
