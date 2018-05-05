@@ -17,13 +17,16 @@ import gianni-lib.jsfx-inc
 initTime();
 
 clock.initClock();
-clock.setPeriod(1);
+clock.setPeriodSeconds(1);
 
 msg.statusHi = 9;
 msg.data1 = 60;
 msg.data2 = 100;
 
+while (a = 0 && !foo) (
+  foo = 1;
+);
+
 @block
 
 clock.tick() && msg.send();
-

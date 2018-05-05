@@ -1,17 +1,37 @@
-desc: naive clock
+desc: gianniMIDI naive clock
+
 in_pin:none
 out_pin:none
 
+slider1:4<1, 64, 1>period in 1/n bars (0 = use seconds);
+slider2:1<0.01, 1, .001>period in seconds;
+
+
+import gianni-lib-bak.jsfx-inc
+
 @init
-sample = 0;
-tick = 0
+
+function setPeriod() 
+(
+  slider1 ? clock.setPeriodBars(1/slider1) : clock.setPeriodSeconds(slider2);
+);
+
+msg.statusHi = 9;
+msg.data1 = 60;
+msg.data2 = 100;
+
+@serialize
+
+setPeriod();
+
+@slider
+
+setPeriod();
 
 @block
 
+clock.c_block();
+
 @sample
-play_state == 1 &&
-(
-  sample == 48000 && sample = 0;
-  !sample && second += 1;
-  sample += 1;
-)
+
+clock.tick() && msg.send();

@@ -16,7 +16,7 @@ function phase(elapsed, period) local(quotient, return) // phase(12, 8) = .5
 (
   period &&
   (
-    elapsed < period ? (return = elapsed) :
+    elapsed < period ? (return = elapsed / period) :
     (
       quotient = elapsed / period;
       // decimal = quotient - quotient<<0
@@ -201,23 +201,23 @@ function samplesPerBar() // nb. may be non-integer
 
 //* CLOCK *//
 
-// global setup
-function initTime()
-(
-  _tInit = time_precise();
-);
+// // global setup
+// function initTime()
+// (
+//   _tInit = time_precise();
+// );
 
-// clock methods
-function initClock()
-(
-  !_tInit && initTime();
-  this.t0 = _tInit;
-  this.prevPhase = 1; // ensure rollover on first tick
-);
+// // clock methods
+// function initClock()
+// (
+//   !_tInit && initTime();
+//   this.t0 = _tInit;
+//   this.prevPhase = 1; // ensure rollover on first tick
+// );
 
 function setPeriodSeconds(seconds)
 (
-  this.period = seconds;
+  this.period = seconds * srate; // 👀 may be non-integer
 );
 
 function setPeriodBars(bars) // 1/16, 1.5 etc
@@ -229,22 +229,28 @@ function setPeriodBars(bars) // 1/16, 1.5 etc
 
 function getPhase()
 (
-  phase((time_precise() - this.t0), this.period);
+  phase(this.scount, this.period);
 );
 
-// call this every sample and it will return 1 when phase rolls over
-function tick() local (_currentPhase, _prevPhase)
+// call in @block, accounts for periods of non-integer sample duration.
+function c_block() 
 (
-  _currentPhase = this.getPhase();
-  _prevPhase = this.prevPhase;
-  this.prevPhase = _currentPhase;
-  _currentPhase < _prevPhase &&
-    (
-      // compute exact time rollover occurred for sane phase evaluation
-      this.t0 = time_precise() - (_currentPhase * this.period)
-    );
-)
+  this.scount >= this.period &&
+  (
+    this.scount -= this.period;
+    this.ticked = 1;
+  );
+);
 
+// call in @sample, will return 1 on tick.
+function tick()
+(
+  this.scount += 1;
+  this.ticked && (
+    this.ticked = 0;
+    1;
+  );
+);
 
 // clock.setPhase(0-1)
 // clock.getPhase() // 0-1
