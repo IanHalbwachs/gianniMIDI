@@ -4,7 +4,7 @@ desc: gianniMIDI start-stop LFO
 in_pin:none
 out_pin:none
 
-slider1:1000<0,10000,10>period (ms) (0 = use bar/n)
+slider1:1<0,10,.001>period (seconds) (0 = use bar/n)
 slider2:4<0.25,16,0.25>period (bar/n)
 slider3:0<0,127,1>trigger note (0 = all)
 slider4:0<0,3,1{sine,triangle,ramp,slide}>shape
@@ -19,12 +19,12 @@ ext_noinit = 1;
 
 function setPeriod()
 (
-  period = slider1 ? (srate * slider1/1000) : (samplesPerBar()/slider2);
+  slider1 ? clock.setPeriodSeconds(slider1) : clock.setPeriodBars(slider2);
 );
 
 function calcShape(shape) local(phase, output)
 (
-  phase = sCount / period;
+  phase = clock.getPhase();
   shape == 0 && (
     output = (sin(2 * $pi * (phase - .25)) + 1) / 2; // sine
   );
@@ -40,9 +40,6 @@ function calcShape(shape) local(phase, output)
   output;
 );
 
-heldNotes = 0;
-sCount = 0;
-
 
 @serialize
 
@@ -56,6 +53,8 @@ setPeriod();
 
 @block
 
+clock.c_block();
+
 while (msg.recv())
 (
   msg.isNoteOn() && heldNotes += 1;
@@ -63,11 +62,9 @@ while (msg.recv())
   msg.send();
 );
 
+heldNotes && slider5 = calcShape(slider4);
+
 
 @sample
 
-heldNotes && (
-  sCount += 1;
-  sCount >= period && sCount = 0;
-  slider5 = calcShape(slider4);
-);
+heldNotes && clock.scount += 1;

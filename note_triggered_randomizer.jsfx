@@ -4,20 +4,30 @@ out_pin:none
 
 slider1:0<0,1,.001>output
 slider2:16<0,32,1>increment by 1/n (0 = smooth)
+slider3:0<0,1,1{polyphonic,monophonic}>behavior
 
 import gianni-lib.jsfx-inc
 
+
 @slider
+
 slider1 = slider2 > 0 ? round(slider1*slider2)/slider2 : slider1;
+slider3 && count = 0;
+
 
 @block
 
 while (msg.recv())
 (
   msg.isNoteOn() && (
-    output = rand(1);
-    slider2>0 && output = round(output*slider2)/slider2;
-    slider1 = output;
+    !slider3 || (slider3 && !count) && 
+    (
+      output = rand(1);
+      slider2 > 0 && output = round(output*slider2)/slider2;
+      slider1 = output;
+    );
+    slider3 && count += 1;
   );
+  slider3 && msg.isNoteOff() && count -= 1; 
   msg.send();
 );

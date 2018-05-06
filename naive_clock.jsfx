@@ -7,7 +7,8 @@ slider1:4<1, 64, 1>period in 1/n bars (0 = use seconds);
 slider2:1<0.01, 1, .001>period in seconds;
 
 
-import gianni-lib-bak.jsfx-inc
+import gianni-lib.jsfx-inc
+
 
 @init
 
@@ -20,17 +21,21 @@ msg.statusHi = 9;
 msg.data1 = 60;
 msg.data2 = 100;
 
+
 @serialize
 
 setPeriod();
+
 
 @slider
 
 setPeriod();
 
+
 @block
 
 clock.c_block();
+
 
 @sample
 

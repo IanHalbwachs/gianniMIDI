@@ -24,10 +24,7 @@ function isMSB()
 
 function sanitizeNoteOffs()
 (
-  this.statusHi == 9 && this.data2 == 0 &&
-  (
-    this.statusHi = 8;
-  );
+  this.statusHi == 9 && this.data2 == 0 && this.statusHi = 8;
 );
 
 MSB.arrayInit(32);

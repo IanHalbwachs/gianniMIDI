@@ -7,7 +7,6 @@ slider1:0<0,100,1>probablility
 
 import gianni-lib.jsfx-inc
 
-@init
 
 @block
 

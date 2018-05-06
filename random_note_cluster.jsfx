@@ -30,7 +30,7 @@ function isTriggerNote()
 
 function shouldPassThrough() local (s, d)
 ( 
-  // we'll use more performant comparators for high volume
+  // use more performant comparators for high volume
   s = this.statusHi;
   d = this.data1;                                        
   (s != 8 && s != 9) ||  // pass trough if msg is neither note on or off
@@ -106,15 +106,11 @@ while (msg.recv())
             (
               playingOnChannel = msg.statusLo;
               sendNoteOns(playingOnChannel, msg.data2);
-            ) 
-          ) 
-            : // msg.isNewClusterNote
-          ( 
+            );
+          ) : ( // msg.isNewClusterNote
             playingOnChannel == -1 && newCluster();
           );
-      )
-        :  // msg.isNoteOff, ignore newClusterNote
-      ( 
+      ) : ( // msg.isNoteOff, ignore newClusterNote
         msg.isTriggerNote() &&
         (
           sendNoteOffs();
