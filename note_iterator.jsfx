@@ -1,0 +1,92 @@
+desc: gianniMIDI note iterator
+in_pin:none
+out_pin:none
+
+slider1:24<0,127,1>trigger note
+slider2:32<0,127,1>from note
+slider3:47<0,127,1>to note
+slider4:1<0,1,1{no,yes}>bind reset to range
+slider5:16<0,127,1>reset after n iterations
+slider6:0<0,2,1{n/a,restart,reverse}>reset > range behavior
+// rotate
+// offset
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+function getDirection()
+(
+  sign(slider3 - slider2);
+);
+
+function setBounds()
+(
+  getDirection() == 1 ? (
+    lowerBound = slider2;
+    upperBound = slider3;
+  ) : (
+    lowerBound = slider3;
+    upperBound = slider2;
+  );
+);
+
+function bindResetToRange()
+(
+  slider5 = abs(slider3 - slider2) + 1;
+  slider6 = 0;
+);
+
+function iterate()
+(
+  !count || (slider2 == slider3) ? (
+    nextNote = slider2;
+  ) : (
+    nextNote = nextNote + direction;
+    (nextNote < lowerBound || nextNote > upperBound) &&
+    (
+      slider6 == 1 ? // should we restart?
+      (
+        nextNote = slider2;
+      ) : ( // else we should should change direction
+        direction = nextNote < lowerBound ? 1 : -1;
+        nextNote + direction == nextMsg.data1 ? ( // did we just play this note ?
+          nextNote = nextMsg.data1 += direction;
+        ) : (
+          // if not we are lost due to user input, just set nextNote to the closest bound
+          nextNote = direction == 1 ? lowerBound : upperBound;
+        );
+      );
+    );
+  );
+  nextMsg.data1 = nextNote;
+  nextMsg.send();
+  count += 1;
+  count > (slider5 - 1) &&
+  (
+    count = 0;
+    direction = getDirection();
+  );
+);
+
+setBounds();
+direction = getDirection(); 
+s6prev = 1; // default to "restart" when n/n/a
+nextMsg.statusHi = 9;
+nextMsg.data2 = 100;
+
+
+@slider
+
+setBounds();
+slider6 && s6prev = slider6; // non-zero value may have changed
+slider4 ? bindResetToRange() : slider6 = s6prev; // set slider6 to previous/default non-zero value when unbound
+
+
+@block
+
+while (msg.recv())
+(
+  (msg.isNoteOn() && msg.note() == slider1) ? iterate() : msg.send();
+);
