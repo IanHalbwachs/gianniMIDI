@@ -1,0 +1,47 @@
+desc: BCF noisemaker pitch hack
+
+in_pin:none
+out_pin:none
+
+in_pin:none
+out_pin:none
+
+slider1:0<0,16383,.0011>val
+import gianni-lib.jsfx-inc
+
+@init
+
+increment = 16384 / 48;
+
+coarseMSB.statusHi = 11;
+coarseMSB.statusLo = 15;
+coarseMSB.data1 = 1;
+
+coarseLSB.statusHi = 11;
+coarseLSB.statusLo = 15;
+coarseLSB.data1 = 33;
+
+fineMSB.statusHi = 11;
+fineMSB.statusLo = 15;
+fineMSB.data1 = 2;
+
+fineLSB.statusHi = 11;
+fineLSB.statusLo = 15;
+fineLSB.data1 = 34;
+
+s1.watchSlider(1);
+
+@block
+
+s1.sliderChanged() &&
+(
+  coarseMSB.data2 = slider1 >> 7;
+  coarseLSB.data2 = slider1 & $~7;
+  fine = phase(slider1, increment) * 16383;
+  fineMSB.data2 = fine >> 7;
+  fineLSB.data2 = fine & $~7;
+  fineMSB.send();
+  fineLSB.send();
+  coarseMSB.send();
+  coarseLSB.send();
+);

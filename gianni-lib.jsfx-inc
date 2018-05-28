@@ -6,22 +6,30 @@ function round(num)
   floor(num + 0.5);
 );
 
-
 function randInt(num)
 (
   round(rand(num));
 );
 
+function clamp(num, min, maxx)
+(
+ max(min(num, maxx), min);
+);
+
 function phase(elapsed, period) local(quotient, return) // phase(12, 8) = .5
 (
+  return = 0;
   period &&
   (
-    elapsed < period ? (return = elapsed / period) :
-    (
-      quotient = elapsed / period;
-      // decimal = quotient - quotient<<0
-      return = (quotient - quotient<<0) * period;
-    );
+    elapsed < period ?
+      (
+        return = elapsed / period;
+      ) :
+      (
+        quotient = elapsed / period;
+        // decimal = quotient - quotient<<0
+        return = (quotient - quotient<<0);
+      );
   );
   return;
 );
@@ -56,7 +64,7 @@ function writeBits(offset, nBits, num)
 
 // * ARRAYS *//
 
-//tenSizeArray.arrayInit(10); 
+// tenSizeArray.arrayInit(10); 
 function arrayInit(size) local (index)
 (
   index = __nextArrayIdx; // __nextArrayIdx will be globally initialized at 0 on first call;
@@ -64,6 +72,17 @@ function arrayInit(size) local (index)
   this = index;
   this.size = size;
   this.length = 0;
+);
+
+// tenSizeArray.default(-1)
+function default(def) local(i)
+(
+  i = 0;
+  while(i < this.size)
+  (
+    this[i] = def;
+    i+= 1;
+  );
 );
 
 // tenSizeArray.push(foo)
@@ -97,8 +116,9 @@ function find(value) local (return, i)
     value == this[i] && return = i;
     i += 1;
   );
-  return; // this will only return -1 or the first index containing the value
+  return; // will return -1 or the first index containing the value
 );
+
 
 //* MIDI *//
 
@@ -108,7 +128,8 @@ function recv() local(received)
 (
   //capture return value of midirecv and scope its args
   received = midirecv(m0, m1, m2, m3);
-  received ? (
+  received && 
+  (
     this.offset = m0;
     // m1 = status byte, some 8 bit number;
     // shift away lowest 4 bits: 1111???? -> 1111
@@ -191,18 +212,34 @@ function parseBits()
 
 //* TIME *//
 
-function samplesPerBar() // nb. may be non-integer
-(
-  // ts_num ts_denoms in a bar (4 quarter notes)
-  // tempo ts_denoms in a minute (120 quarter notes)
-  // duration of 1 bar in minutes = ts_num / tempo -> 4/120 = 0.0333...
-  // duration of 1 bar in seconds = 60 * ts_num / tempo -> 4*60/120 = 2
-  // duration of 1 bar in samples = srate * 60 * ts_num / tempo) -> 48000 * 2
-  srate * ts_num * 60 / tempo;
-);
+// function samplesPerBar() // nb. may be non-integer
+// (
+//   // ts_num ts_denoms in a bar (4 quarter notes)
+//   // tempo ts_denoms in a minute (120 quarter notes)
+//   // duration of 1 bar in minutes = ts_num / tempo -> 4/120 = 0.0333...
+//   // duration of 1 bar in seconds = 60 * ts_num / tempo -> 4*60/120 = 2
+//   // duration of 1 bar in samples = srate * 60 * ts_num / tempo) -> 48000 * 2
+//   srate * ts_num * 60 / tempo;
+// );
 
 
 //* CLOCK *//
+_prevTempo = tempo;
+_prevPlayState = play_state;
+
+function playChanged() local(return)
+(
+  return = _prevPlayState !== play_state;
+  return && _prevPlayState = play_state;
+  return;
+);
+
+function tempoChanged() local(return)
+(
+  return = _prevTempo !== tempo;
+  return && _prevTempo = tempo;
+  return;
+);
 
 function setPeriodSeconds(seconds)
 (
@@ -219,6 +256,12 @@ function setPeriodBars(bars) // 1/16, 1.5 etc
 function getPhase()
 (
   phase(this.scount, this.period);
+);
+
+function c_init()
+(
+  this.scount = 0;
+  this.ticked = 1; // ensure first tick;
 );
 
 // call in @block, accounts for periods of non-integer sample duration.
@@ -252,3 +295,30 @@ function tick()
 // clock.setRate(hz)
 // clock.getRate() //hz
 // //
+
+
+//* SLIDER *//
+
+// call watchSliders in @init and sliderChanged(x) will return 1/0 when called in @slider or @block (but not acurately in both)
+
+function watchSliders() local(i)
+(
+  watchedSliders.arrayInit(64);
+  while(i < 64)
+  (
+    watchedSliders[i] = slider(i);
+    i += 1;
+  );
+);
+
+function watchSlider(sliderNumber)
+(
+  watchedSliders[sliderNumber] = slider(sliderNumber);
+);
+
+function sliderChanged(sliderNumber) local(return)
+(
+  return = watchedSliders[sliderNumber] !== slider(sliderNumber);
+  return && watchedSliders[sliderNumber] = slider(sliderNumber);
+  return;
+);

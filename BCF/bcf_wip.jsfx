@@ -1,0 +1,60 @@
+desc: BCF WIP
+
+in_pin:none
+out_pin:none
+
+slider1:0<0,1,.0001>F1
+
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+function handleButtons()
+(
+  this.statusLo == 15 &&
+  this.statusHi == 9 &&
+  buttons[this.data1] = this.data2 ? 1 : 0;
+);
+
+function sendSnapshot() local(i, val, lsb)
+(
+  i = 0;
+  while (i < 1)
+  (
+    val = floor(slider(i+1) * 16383); // max value = 2^14 - 1
+    lsb = val & 127; // 7 bit mask
+    midisend(0, 191, i, (val - lsb)>>7); // msb
+    midisend(0, 191, (i + 32), lsb);
+    i += 1;
+  );
+
+  i = 0;
+  while (i < buttons.size)
+  (
+    btnMsg.data2 = buttons[i];
+    btnMsg.data2 > -1 &&
+    (
+      btnMsg.data1 = i;
+      btnMsg.send();
+    );
+    i += 1;
+  );
+);
+
+buttons.arrayInit(4);
+btnMsg.statusHi = 9;
+btnMsg.statusLo = 15;
+
+
+@block
+
+msg.recv() && msg.handleButtons();
+
+buttons[1] && buttons[3] &&
+(
+  sendSnapshot();
+  buttons[1] = 0;
+  buttons[3] = 0;
+);

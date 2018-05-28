@@ -1,0 +1,87 @@
+desc: BCF 14 bit faders to sliders
+
+in_pin:none
+out_pin:none
+
+slider1:0<0,1,.00001>F1
+slider2:0<0,1,.00001>F2
+slider3:0<0,1,.00001>F3
+slider4:0<0,1,.00001>F4
+slider5:0<0,1,.00001>F5
+slider6:0<0,1,.00001>F6
+slider7:0<0,1,.00001>F7
+slider8:0<0,1,.00001>F8
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+
+function isMSB()
+(
+  this.statusHi == 11 &&
+  this.statusLo == 15 &&
+  this.data1 < 9;
+);
+
+function isLSB()
+(
+  this.statusHi == 11 &&
+  this.data1 > 32 && this.data1 < 41;
+);
+
+function sanitizeNoteOffs()
+(
+  this.statusHi == 9 && this.data2 == 0 && this.statusHi = 8;
+);
+
+watchSliders();
+MSB.arrayInit(8);
+LSB.arrayInit(8);
+
+while (i < 8)
+(
+  MSB[i] = -1;
+  LSB[i] = -1;
+  i += 1;
+);
+
+
+@block
+
+while (msg.recv())
+( 
+  msg.statusLo == 15 ?
+  (
+    msg.sanitizeNoteOffs();
+    (!msg.isMSB() && !msg.isLSB()) ? msg.send() :
+    (
+      msg.isMSB() ?
+        MSB[msg.data1-1] = msg.data2 :
+        LSB[msg.data1-33] = msg.data2;
+      i = 0;
+      continue = 1;
+      while (continue && i < 8)
+      (
+        _msb = MSB[i];
+        _lsb = LSB[i];
+        _msb > -1 && _lsb > -1 &&
+        (
+          i != 4 ? (
+            slider(i+1) = ((_msb << 7) + _lsb) / $~14;
+          ) : (
+            // fader 5 on my BCF is janky, this adjusts for a physical hack
+            slider5 = clamp(
+              (((((_msb << 7) + _lsb) / $~14) - 0.024843) / 0.836721), 0, 1;
+            );
+          );
+          MSB[i] = -1;
+          LSB[i] = -1;
+          continue = 0;
+        );
+        i += 1;
+      );
+    );
+  ) : msg.send();
+);

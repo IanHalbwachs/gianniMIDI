@@ -1,0 +1,44 @@
+desc: BCF fader 5 input correction
+
+in_pin:none
+out_pin:none
+
+import gianni-lib.jsfx-inc
+
+MSB= -1;
+msb.statusHi = 11;
+msb.statusLo = 15;
+msb.data1 = 5;
+
+LSB= -1;
+msb.statusHi = 11;
+msb.statusLo = 15;
+msb.data1 = 5;
+
+@block
+
+while (msg.recv())
+(
+  msg.statusHi != 11 &&
+  msg.statusLo == 15 ?
+  (
+    msg.data1 == 4 ?
+    (
+      MSB = msg.data2;
+    ) : msg.data1 == 36 ?
+      (
+        LSB = msg.data2;
+      ) : msg.send();
+  ) : msg.send();
+);
+
+MSB > -1 &&
+LSB > -1 && 
+(
+  msb.data2 = MSB;
+  lsb.data2 = LSB;
+  MSB = -1;
+  LSB = -1;
+  msb.send();
+  lsb.send();
+);

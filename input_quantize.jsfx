@@ -4,7 +4,6 @@ in_pin:none
 out_pin:none
 
 slider1:16<1,16,1>quantize interval (bar/n)
-
 slider2:0<0,2,1{don't (good for one-shots),unquantized (note on & offs received within the same interval will not play),quantized (note on & offs received within the same interval will not play)}>send note offs 
 
 import gianni-lib.jsfx-inc
@@ -58,10 +57,7 @@ function dequeue(queue*)
 onQueue.arrayInit(128);
 offQueue.arrayInit(128);
 
-
-@serialize
-
-clock.setPeriodBars(1/slider1);
+clock.c_init();
 
 
 @slider
@@ -71,6 +67,7 @@ clock.setPeriodBars(1/slider1);
 
 @block
 
+tempoChanged() && clock.setPeriodBars(1/slider1);
 clock.c_block();
 
 

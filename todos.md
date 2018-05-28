@@ -1,12 +1,14 @@
-* nrpn -> slider fx
+* ~~nrpn -> slider fx~~
 
-* balance() fn for when counting samples + period is non-integer -> period.balance() would return floor or ceil depending on some logic // if you're running into trouble syncing samples to beat positions you should probably be using bpos - maybe possible to have a sync/playstate-aware phase fn?
+* ~~balance() fn for when counting samples + period is non-integer -> period.balance() would return floor or ceil depending on some logic // if you're running into trouble syncing samples to beat positions you should probably be using bpos - maybe possible to have a sync/playstate-aware phase fn?~~
 
-* randInt should take two arguments // should it really though?
+* ~~randInt should take two arguments // should it really though?~~
  
 ~need some custom bitwise functions ie. <1011010101>.get(<bits two thru four>)~
 
 * keyrange controlled LFO
+
+* pentastrum - say you play a note a fifth down from the prevvious, will strum/hold chord on the way down. some implementation of local max and minima as well
 
 * chordFarm
 

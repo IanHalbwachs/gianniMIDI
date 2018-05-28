@@ -49,9 +49,11 @@ function iterate()
       slider6 == 1 ? // should we restart?
       (
         nextNote = slider2;
-      ) : ( // else we should should change direction
+      ) : (
+        // else we should change direction
         direction = nextNote < lowerBound ? 1 : -1;
-        nextNote + direction == nextMsg.data1 ? ( // did we just play this note ?
+        nextNote + direction == nextMsg.data1 ? // did we just play this note ?
+        (
           nextNote = nextMsg.data1 += direction;
         ) : (
           // if not we are lost due to user input, just set nextNote to the closest bound

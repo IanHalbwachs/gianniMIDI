@@ -47,7 +47,7 @@ function newCluster()
   loop(
     slider3,
     (
-      // default to 0 for statusLo (channel) and data2 (vel), will be determined by trigger note
+      // statusLo (channel) and data2 (vel) will be determined by trigger note
       msgNC.statusHi = 9;
       msgNC.data1 = slider1 + randInt(range);
       cluster.push(msgNC.toBits();)
