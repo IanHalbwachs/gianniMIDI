@@ -73,18 +73,12 @@ clock.c_block();
 
 @sample 
 
-clock.tick() && (
-  slider2 == 2 && dequeue(offQueue);
-  dequeue(onQueue);
-);
-
 while (msg.recv())   
 (
   handled = 0;
   msg.isNoteOn() &&
   (
     (msg.posInQueue() < 0) && msg.enqNoteOn();
-    (msg.posInQueue() < 0) && foundinnoteon += 1;
     handled = 1;
   );
   msg.isNoteOff() &&
@@ -96,4 +90,9 @@ while (msg.recv())
     handled = 1;
   );
   !handled && msg.send();
+);
+
+clock.tick() && (
+  slider2 == 2 && dequeue(offQueue);
+  dequeue(onQueue);
 );
