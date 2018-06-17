@@ -1,6 +1,7 @@
 @init
 
 //* MATH *//
+
 function round(num)
 (
   floor(num + 0.5);
@@ -11,9 +12,14 @@ function randInt(num)
   round(rand(num));
 );
 
-function clamp(num, min, maxx)
+function clamp(num, min, max)
 (
- max(min(num, maxx), min);
+ max(min(num, max), min);
+);
+
+function isWithin(lo, hi, num)
+(
+  num >= lo && num <= hi;
 );
 
 function phase(elapsed, period) local(quotient, return) // phase(12, 8) = .5
@@ -168,13 +174,13 @@ function sendWithOffset(offset)
 
 function isNoteOn()
 (
-  this.statusHi == 9;
+  this.statusHi == 9 && this.data2;
 );
 
 
 function isNoteOff()
 (
-  this.statusHi == 8;
+  this.statusHi == 8 || (!this.data2 && this.statusHi == 9);
 );
 
 
@@ -209,21 +215,14 @@ function parseBits()
 );
 // ^^ nb. you can mutate x.foo then call x = x.toBits() again if need be
 
-
-//* TIME *//
-
-// function samplesPerBar() // nb. may be non-integer
-// (
-//   // ts_num ts_denoms in a bar (4 quarter notes)
-//   // tempo ts_denoms in a minute (120 quarter notes)
-//   // duration of 1 bar in minutes = ts_num / tempo -> 4/120 = 0.0333...
-//   // duration of 1 bar in seconds = 60 * ts_num / tempo -> 4*60/120 = 2
-//   // duration of 1 bar in samples = srate * 60 * ts_num / tempo) -> 48000 * 2
-//   srate * ts_num * 60 / tempo;
-// );
+function sanitizeNoteOffs()
+(
+  this.statusHi == 9 && this.data2 == 0 && this.statusHi = 8;
+);
 
 
-//* CLOCK *//
+//* STATE *//
+
 _prevTempo = tempo;
 _prevPlayState = play_state;
 
@@ -241,9 +240,30 @@ function tempoChanged() local(return)
   return;
 );
 
+
+//* CLOCK *//
+
+function pause()
+(
+  this.resume = this.period;
+  this.period = 0;
+);
+
+function resume()
+(
+  this.period = this.resume;
+  this.resume = 0;
+);
+
+function setPeriod(samples)
+(
+  this.period = samples;
+  this.resume && this.pause(); // !!this.resume == paused
+); 
+
 function setPeriodSeconds(seconds)
 (
-  this.period = seconds * srate; // 👀 may be non-integer
+  this.setPeriod(seconds * srate); // 👀 may be non-integer
 );
 
 function setPeriodBars(bars) // 1/16, 1.5 etc
@@ -258,18 +278,22 @@ function getPhase()
   phase(this.scount, this.period);
 );
 
+// call in @init
 function c_init()
 (
   this.scount = 0;
-  this.ticked = 1; // ensure first tick;
+  this.ticked = 1; // ensure tick on start;
+  this.parity = 1;
 );
 
 // call in @block, accounts for periods of non-integer sample duration.
 function c_block() 
 (
-  this.scount >= this.period &&
+  this.period && (this.scount >= this.period) &&
   (
     this.scount -= this.period;
+    // this.period = clock.handleSwing();
+    // this.swing && (this.period = this.handleSwing())
     this.ticked = 1;
   );
 );
@@ -277,13 +301,17 @@ function c_block()
 // call in @sample, will return 1 on tick.
 function tick()
 (
-  this.scount += 1;
-  this.ticked && (
-    this.ticked = 0;
-    1;
+  this.period && (
+    this.scount += 1;
+    this.ticked && (
+      this.ticked = 0;
+      this.parity = !this.parity;
+      1;
+    );
   );
 );
 
+// WIP
 // clock.setPhase(0-1)
 // clock.getPhase() // 0-1
 // clock.setPeriodSeconds(sec)
@@ -294,31 +322,3 @@ function tick()
 // clock.resume()
 // clock.setRate(hz)
 // clock.getRate() //hz
-// //
-
-
-//* SLIDER *//
-
-// call watchSliders in @init and sliderChanged(x) will return 1/0 when called in @slider or @block (but not acurately in both)
-
-function watchSliders() local(i)
-(
-  watchedSliders.arrayInit(64);
-  while(i < 64)
-  (
-    watchedSliders[i] = slider(i);
-    i += 1;
-  );
-);
-
-function watchSlider(sliderNumber)
-(
-  watchedSliders[sliderNumber] = slider(sliderNumber);
-);
-
-function sliderChanged(sliderNumber) local(return)
-(
-  return = watchedSliders[sliderNumber] !== slider(sliderNumber);
-  return && watchedSliders[sliderNumber] = slider(sliderNumber);
-  return;
-);

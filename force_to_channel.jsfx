@@ -1,0 +1,25 @@
+desc: gianniMIDI force to channel
+in_pin:none
+out_pin:none
+
+import gianni-lib.jsfx-inc
+
+slider1:1<1,16,1>channel
+
+@init
+
+channel = slider1 - 1;
+
+
+@slider
+
+channel = slider1 - 1;
+
+
+@block
+
+while(msg.recv())
+(
+  msg.statusLo = channel;
+  msg.send();
+);

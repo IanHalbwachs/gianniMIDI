@@ -1,4 +1,4 @@
-desc: gianniMIDI transpose BCF notes
+desc: gianniMIDI wtf
 in_pin:none
 out_pin:none
 
@@ -7,15 +7,31 @@ slider1:36<0,128,1>target base note
 import gianni-lib.jsfx-inc
 
 
+@init
+
+cc20.statusHi = 11;
+cc20.statusLo = 0;
+cc20.data1 = 20;
+cc20.data2 = 1;
+
+cc21.statusHi = 11;
+cc21.statusLo = 0;
+cc21.data1 = 21;
+cc21.data2 = 1;
+
+cc22.statusHi = 11;
+cc22.statusLo = 0;
+cc22.data1 = 22;
+cc22.data2 = 4;
+
 @block
 
 while(msg.recv())
 (
-  msg.statusHi == 11 &&
-  msg.statusLo == 15 &&
-  (msg.data1 > 11 || msg.data1 < 28) &&
+  msg.isNoteOn() &&
   (
-    msg.data1 += (slider1 - 12);
+    cc20.send();
+    cc21.send();
+    cc22.send();
   );
-  msg.send();
 );

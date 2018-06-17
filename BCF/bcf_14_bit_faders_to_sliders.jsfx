@@ -31,12 +31,6 @@ function isLSB()
   this.data1 > 32 && this.data1 < 41;
 );
 
-function sanitizeNoteOffs()
-(
-  this.statusHi == 9 && this.data2 == 0 && this.statusHi = 8;
-);
-
-watchSliders();
 MSB.arrayInit(8);
 LSB.arrayInit(8);
 

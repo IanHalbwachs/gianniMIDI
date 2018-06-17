@@ -1,0 +1,128 @@
+desc: BCF 8 voice linear sequencer
+in_pin:none
+out_pin:none
+
+slider1:v1=60<0,127,1>voice 1
+slider2:v2=61<0,127,1>voice 2
+slider3:v3=62<0,127,1>voice 3
+slider4:v4=63<0,127,1>voice 4
+slider5:v5=64<0,127,1>voice 5
+slider6:v6=65<0,127,1>voice 6
+slider7:v7=66<0,127,1>voice 7
+slider8:v8=67<0,127,1>voice 8
+// slider9:c1=1<0,15,1>-vChan1
+// slider10:c1=1<1,16,1>-vChan2
+// slider11:c1=1<1,16,1>-vChan3
+// slider12:c1=1<1,16,1>-vChan4
+// slider13:c1=1<1,16,1>-vChan5
+// slider14:c1=1<1,16,1>-vChan6
+// slider15:c1=1<1,16,1>-vChan7
+// slider16:c1=1<1,16,1>-vChan8
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+// init steps to off/voice1 and values to mid
+i = 17;
+
+while(i < 32)
+(
+  slider(i) = -1;
+  i +=1;
+);
+
+while (i < 65)
+(
+  slider(i) = 63;
+  i += 1;
+);
+
+voice = 0;
+// vChan = 8;
+// step = 16;
+stepOffset = 5; // step 1 == note 12 == slider 17
+value = 32;
+
+
+function handleEncoderButtons()
+(
+  this.statusLo == 15 &&
+  this.statusHi == 9 &&
+  isWithin(28, 59, this.data1) &&
+  (
+    this.data1 = 28 + ((this.data1 - 4) % 8);
+    encoderPressed = this.data2 ? this.data1 : 0;
+  );
+);
+
+function isStepButton()
+(
+  this.statusLo == 15 &&
+  this.statusHi == 9 &&
+  isWithin(12, 27, this.data1);
+);
+
+
+@block
+
+while(msg.recv())
+(
+  handled = 0;
+  //pre-processing
+  msg.handleEncoderButtons();
+
+  // processing
+  !encoderPressed && msg.isStepButton() && 
+  (
+    /*
+      if a step is low and msg.isNoteOn
+        set step to high
+      if a step is high and note off recv
+        send a note on to keep that step lit
+      if a step is high and note on recv
+        set step to low and send note off
+      if a step is low and note off received
+        do nothing
+    */
+    stepSlider = msg.data1 + stepOffset;
+    stepAssignment = slider(stepSlider);
+    stepAssignment < 0 ? (           // is this step inactive?
+      msg.data2 && (                  // is this a note on?
+        slider(stepSlider) *= -1;       // set step to active
+      );
+    ) : (                           // is the step active?
+      msg.data2 ? (                   // is this a note on?
+        slider(stepSlider) *= -1;       // set step to inactive
+        msg.data2 = 0;                  // send message to turn light off
+        msg.send();
+      ) : (                           // is this a note off?
+        msg.data2 = 127;                // the user just released the button
+        msg.send();                     // we'll send a message to turn the light back on                  // to indicate active status
+      );
+    );
+    handled = 1;
+  );
+
+  encoderPressed && msg.isStepButton() &&
+  (
+      
+      // if !=prev, set values to mid and update display
+      // if step is in active, activate 
+
+
+    
+
+    // if msg.isNoteOff and step is active, BCF will turn light off 
+    // send a message to turn the light back on
+
+    handled = 1; 
+  );
+
+  //post-processing
+  !handled && ( 
+    msg.sanitizeNoteOffs();
+    msg.send();
+  );
+);

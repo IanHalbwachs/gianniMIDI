@@ -1,0 +1,17 @@
+desc: gianniMIDI foobar
+in_pin:none
+out_pin:none
+
+slider1:63<0,127,1>numbers
+slider2:0<0,2,1{foo,bar,baz}>named options
+slider3:bloop=63<0,127,1>slider as variable name
+
+import gianni-lib.jsfx-inc
+
+
+@block
+
+while(msg.recv())
+(
+  msg.send();
+);

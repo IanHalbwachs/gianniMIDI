@@ -1,0 +1,39 @@
+desc: gianniMIDI note range to slider + note
+in_pin:none
+out_pin:none
+
+slider1:12<0,128,1>low note
+slider2:0<0,1,0.00001>output
+slider3:36<0,127,1>output note
+
+import gianni-lib.jsfx-inc
+
+@init
+
+step = 1 / 16;
+channel = 0;
+
+function calcOutput()
+(
+  (this.data1 - slider1) * step;
+);
+
+
+@block
+
+while(msg.recv())
+(
+  msg.isNoteOn() && isWithin(slider1, (slider1 + 15), msg.data1) &&
+  (
+    slider2 = msg.calcOutput();
+    msg.data1 = slider3;
+    msg.statusLo = channel;
+  );
+  msg.isNoteOff() && isWithin(slider1, (slider1 + 15), msg.data1) &&
+  (
+    msg.sanitizeNoteOffs();
+    msg.data1 = slider3;
+    msg.statusLo = channel;
+  );
+  msg.send();
+);

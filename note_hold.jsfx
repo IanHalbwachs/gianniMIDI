@@ -1,0 +1,88 @@
+desc: gianniMIDI note_hold
+in_pin:none
+out_pin:none
+
+import gianni-lib.jsfx-inc
+
+slider1:globo:=0<0,1,1{per channel, all channels}>behavior
+
+@init
+
+// todo: panic on slider1Change
+
+playing.arrayInit(16);
+off.statusHi = 8;
+
+working = 0;
+
+function sendNoteOff(note, channel)
+(
+  off.offset = offset;
+  off.statusLo = channel;//noteChannel & $~4;
+  off.data1 = note;//noteChannel >> 4;;
+  off.send();
+);
+
+function noteOnChannel(n)
+(
+  playing[n];
+);
+
+function noteOnAnyChannel() local(continue, i, return)
+(
+  return = -1;
+  continue = 1;
+  i = 0;
+  while (continue && (i < 16)) (
+    (playing[i] > -1) &&
+    (
+      continue = 0;
+      return = (playing[i] << 4) + i;
+    );
+    i+=1;
+  );
+  return;
+);
+
+function handleGlobalNoteOn() local(noteChannel, note, channel)
+(
+  noteChannel = noteOnAnyChannel();
+  working &&
+  (
+    note = noteChannel >> 4;
+    channel = noteChannel & $~4;
+    sendNoteOff(noteChannel >> 4, noteChannel & $~4)
+  );
+  playing[this.statusLo] = this.data1;
+);
+
+
+function handleChannelNoteOn() local(note, channel)
+(
+  channel = this.statusLo;
+  note = noteOnChannel(channel);
+  working &&
+  (
+    sendNoteOff(note, channel);
+  );
+  playing[channel] = this.data1;
+  // find note playing on this channel
+  // send that note its off
+  // send note on
+);
+
+
+@block
+
+while(msg.recv())
+(
+  msg.isNoteOn() ?
+  (
+    !working && working = 1;
+    offset = this.offset;
+    globo ? msg.handleGlobalNoteOn() : msg.handleChannelNoteOn();
+    msg.send();
+  ) : (
+    !msg.isNoteOff() && msg.send();
+  );
+);

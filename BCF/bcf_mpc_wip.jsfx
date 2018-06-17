@@ -1,0 +1,94 @@
+in_pin:none
+out_pin:none
+
+slider1:0<0,1,0.00000001>zone start
+slider2:0<-7,7,1>transpose
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+ext_noinit = 1;
+
+function isPad()
+(
+  this.statusHi == 9 &&
+  this.statusLo == 15 &&
+  isWithin(12, 27, this.data1) &&
+  this.data2;
+);
+
+function handleLearnButton()
+(
+  this.statusHi == 9 &&
+  this.statusLo == 15 &&
+  this.data1 == 7 &&
+  (  
+    learn = this.data2;
+    handled = 1;
+  );
+);
+
+function handleIncDec() local (next)
+(
+  this.statusHi == 9 &&
+  this.statusLo == 15 &&
+  this.data2 &&
+  isWithin(0, 3, this.data1) &&
+  (
+    next = slider1;
+    this.data1 == 2 && next -= increment;
+    this.data1 == 3 && next += increment;
+    this.data1 == 0 && next -= 10 * increment;
+    this.data1 == 1 && next += 10 * increment;
+    slider1 = clamp(next, 0, 1);
+    slider_automate(slider1);
+    unassignedZoneValue = slider1;
+  ); 
+);
+
+zoneValues.arrayInit(16);
+zoneValues.default(-1);
+unassignedZoneValue = 0;
+
+transposeValues.arrayInit(16);
+transposeValues.default(-8);
+unassignedTransposeValue = 0;
+
+learn = 0;
+increment = 1 / pow(2, 14);
+
+@slider
+
+unassignedZoneValue = slider1;
+unassignedTransposeValue = slider2;
+
+@block
+
+while (msg.recv())
+(
+  handled = 0;
+  msg.handleLearnButton();
+  msg.handleIncDec();
+  msg.isPad() &&
+  (
+    activePad = msg.data1 - 12;
+    learn ?
+    (
+      zoneValues[activePad] = slider1;
+      transposeValues[activePad] = slider2
+    ) : (
+      activeZoneValue = zoneValues[activePad];
+      activeTransposeValue = transposeValues[activePad];
+      slider1 = (activeZoneValue > -1) ? activeZoneValue : unassignedZoneValue;
+      slider2 = (activeTransposeValue > -8) ? activeTransposeValue : unassignedTransposeValue;
+      slider_automate(slider1);
+      slider_automate(slider2);
+    );
+  );
+  !handled && (
+    msg.sanitizeNoteOffs();
+    msg.send();
+  );
+);

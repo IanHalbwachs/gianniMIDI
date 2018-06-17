@@ -1,4 +1,4 @@
-desc: gianniMIDI naive clock
+ desc: gianniMIDI naive clock
 
 in_pin:none
 out_pin:none
@@ -20,12 +20,8 @@ function setPeriod()
 msg.statusHi = 9;
 msg.data1 = 60;
 msg.data2 = 100;
+
 clock.c_init();
-
-@serialize
-
-setPeriod();
-
 
 @slider
 
@@ -34,6 +30,7 @@ setPeriod();
 
 @block
 
+tempoChanged() && setPeriod();
 clock.c_block();
 
 

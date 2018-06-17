@@ -1,0 +1,62 @@
+desc: gianniMIDI tapper
+in_pin:none
+out_pin:none
+
+import gianni-lib.jsfx-inc
+
+@init
+
+ext_noinit = 1;
+
+ticking = 0;
+counting = 0;
+count = 0;
+
+clock.c_init();
+
+on.statusHi = 9;
+on.data1 = 36;
+on.data2 = 127;
+
+off.statusHi = 8;
+off.data1 = 36;
+
+@block
+
+while (msg.recv()) (
+  msg.isNoteOn() &&
+  (
+    !counting ? (
+      ticking ?
+      (
+        off.send();
+        ticking = 0;
+      ) : (
+        on.send();
+        clock.scount = 0;
+        counting = 1;
+      );
+    ) : (
+      clock.c_init();
+      ticking = 1;
+      clock.period = count;
+      count = 0;
+      counting = 0;
+    );
+  );
+);
+
+clock.c_block();
+
+
+@sample
+
+counting ? (
+  count += 1;
+) : (
+  ticking && clock.tick() &&
+  (
+    off.send();
+    on.send();
+  );
+);

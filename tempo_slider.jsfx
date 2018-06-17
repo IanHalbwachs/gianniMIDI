@@ -1,0 +1,14 @@
+desc: gianniMIDI tempo slider
+in_pin:none
+out_pin:none
+
+import gianni-lib.jsfx-inc
+
+
+slider1:factor=1<.5,2,.0001>factor
+slider2:output=100<0,200,.0001>output
+slider3:offset=0<0,1,0.0625>offset
+
+@block
+
+output = tempo * factor;
