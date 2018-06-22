@@ -283,13 +283,12 @@ function c_init()
 (
   this.scount = 0;
   this.ticked = 1; // ensure tick on start;
-  this.parity = 1;
 );
 
 // call in @block, accounts for periods of non-integer sample duration.
 function c_block() 
 (
-  this.period && (this.scount >= this.period) &&
+  this.period && (this.scount >= (this.period + this.offset)) &&
   (
     this.scount -= this.period;
     // this.period = clock.handleSwing();
@@ -305,7 +304,6 @@ function tick()
     this.scount += 1;
     this.ticked && (
       this.ticked = 0;
-      this.parity = !this.parity;
       1;
     );
   );

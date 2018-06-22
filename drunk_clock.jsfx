@@ -1,0 +1,54 @@
+ desc: gianniMIDI naive c lock
+
+in_pin:none
+out_pin:none
+
+slider1:8<1,16,1>master period (1/n bars
+slider2:2<1,8,1>slave period (master/n)
+slider3:0<-1,1,.1>drunk factor
+slider4:0<0,4>offset (sober slave periods)
+
+
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+on.statusHi = 9;
+on.data1 = 60;
+on.data2 = 100;
+
+off.statusHi = 8;
+off.data1 = 60;
+
+masterClock.c_init();
+slaveClock.c_init();
+
+function setPeriods()
+(
+  masterClock.setPeriodBars(1 / slider1);
+  slaveClock.setPeriod(masterClock.period / (slider2 - slider3));
+);
+
+@slider
+
+setPeriods();
+masterClock.offset = slider4 * masterClock.period / slider2;
+
+
+@block
+
+tempoChanged() && setPeriods();
+masterClock.c_block();
+slaveClock.c_block();
+
+
+@sample
+
+masterClock.tick() && slaveClock.c_init();
+slaveClock.tick() &&
+(
+  off.send();
+  on.send();
+);
