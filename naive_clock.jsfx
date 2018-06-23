@@ -36,4 +36,4 @@ clock.c_block();
 
 @sample
 
-clock.tick() && msg.send();
+clock.tick() && msg.sendWithOffset(clock.midiOffset);

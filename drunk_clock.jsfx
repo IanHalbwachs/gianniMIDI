@@ -1,13 +1,13 @@
- desc: gianniMIDI naive c lock
+desc: gianniMIDI drunk clock
 
 in_pin:none
 out_pin:none
 
-slider1:8<1,16,1>master period (1/n bars
-slider2:2<1,8,1>slave period (master/n)
-slider3:0<-1,1,.1>drunk factor
-slider4:0<0,4>offset (sober slave periods)
-
+slider1:8<1,16,1>sober period (1/n bars)
+slider2:2<1,8,1>drunk period (sober period /n)
+slider3:0<0,4,1>offset n drunk periods
+slider4:0<-1,1,.01>drunk factor
+slider5:60<0,127,1>output note
 
 
 import gianni-lib.jsfx-inc
@@ -22,33 +22,35 @@ on.data2 = 100;
 off.statusHi = 8;
 off.data1 = 60;
 
-masterClock.c_init();
-slaveClock.c_init();
+soberClock.c_init();
+drunkClock.c_init();
 
 function setPeriods()
 (
-  masterClock.setPeriodBars(1 / slider1);
-  slaveClock.setPeriod(masterClock.period / (slider2 - slider3));
+  soberClock.setPeriodBars(1 / slider1);
+  drunkClock.setPeriod(soberClock.period / (slider2 - slider4));
 );
 
 @slider
 
 setPeriods();
-masterClock.offset = slider4 * masterClock.period / slider2;
+soberClock.offset = slider3 * soberClock.period / slider2;
+on.data1 = slider5;
+off.data1 = on.data1;
 
 
 @block
 
-tempoChanged() && setPeriods();
-masterClock.c_block();
-slaveClock.c_block();
+
+soberClock.c_block();
+drunkClock.c_block();
 
 
 @sample
-
-masterClock.tick() && slaveClock.c_init();
-slaveClock.tick() &&
+tempoChanged() && setPeriods();
+soberClock.tick() && drunkClock.c_init();
+drunkClock.tick() &&
 (
-  off.send();
-  on.send();
+  off.sendWithOffset(drunkClock.midiOffset);
+  on.sendWithOffset(drunkClock.midiOffset);
 );

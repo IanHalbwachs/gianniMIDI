@@ -281,32 +281,54 @@ function getPhase()
 // call in @init
 function c_init()
 (
+  this.init = 1;
   this.scount = 0;
-  this.ticked = 1; // ensure tick on start;
 );
 
-// call in @block, accounts for periods of non-integer sample duration.
-function c_block() 
-(
-  this.period && (this.scount >= (this.period + this.offset)) &&
-  (
-    this.scount -= this.period;
-    // this.period = clock.handleSwing();
-    // this.swing && (this.period = this.handleSwing())
-    this.ticked = 1;
-  );
+// // call in @block, accounts for periods of non-integer sample duration.
+// function c_block() 
+// (
+//   this.period && (this.scount >= (this.period + this.offset)) &&
+//   (
+//     this.scount -= this.period;
+//     // this.period = clock.handleSwing();
+//     // this.swing && (this.period = this.handleSwing())
+//     this.ticked = 1;
+//   );
+// );
+
+// // call in @sample, will return 1 on tick.
+// function tick()
+// (
+//   this.period && (
+//     this.scount += 1;
+//     this.ticked && (
+//       this.ticked = 0;
+//       1;
+//     );
+//   );
+// );
+
+function c_block()
+( 
+  this.midiOffset = -1;
 );
 
-// call in @sample, will return 1 on tick.
 function tick()
 (
-  this.period && (
-    this.scount += 1;
-    this.ticked && (
-      this.ticked = 0;
+  this.midiOffset += 1;
+  this.sCount < (this.period + this.offset) ? (
+    this.sCount += 1;
+    this.init ? (
+      this.init = 0;
       1;
+    ) : (
+      0;
     );
-  );
+  ) : (
+    this.sCount -= (this.period -1);
+    1;
+  )
 );
 
 // WIP
