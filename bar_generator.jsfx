@@ -1,0 +1,111 @@
+desc: gianniMIDI C maj generator
+in_pin:none
+out_pin:none
+
+slider1:lowOctave=4<0,9,1>Low octave (middle C = 5)
+slider2:highOctave=6<0,9,1>High octave
+slider3:lowVel=100<1,127,1>Low velocity
+slider4:newTrig=0<0,127,1>New sequence note
+slider5:duration=16<1,32,1>Duration (16ths)
+slider6:density=5<1,10,1>Density
+slider7:slideProb=1<0,10,1>Slide probability
+import gianni-lib.jsfx-inc
+
+
+@init
+
+cMaj.arrayInit(7);
+cMaj.push(0);
+cMaj.push(2);
+cMaj.push(4);
+cMaj.push(5);
+cMaj.push(7);
+cMaj.push(9);
+
+seq.arrayInit(32);
+seq.default(-1);
+
+clock.c_init();
+
+next = 0;
+nextOff = -1;
+
+on.statusHi = 9;
+off.statusHo = 8;
+
+function sendOff()
+(
+  off.offset = sampleOffset;
+  off.data1 = nextOff;
+  off.send();
+  nextOff = -1;
+);
+
+function sendOn()
+(
+  on.offset = sampleOffset;
+  on.data1 = seq[next];
+  on.data2 = lowVel + randInt(velRange);
+  on.send();
+  nextOff = on.data1;
+);
+
+
+function isNewTrig()
+(
+  msg.isNoteOn() && msg.data1 == newTrig;
+);
+
+function generate()
+(
+  i = 0;
+  debug1=duration;
+  while (i < duration)
+  (
+    seq[i] = (randInt(9) < density) ? cMaj[randInt(6)] + ((lowOctave + (randInt(octRange))) * 12) : -1;
+    i += 1;
+  );
+);
+
+@slider
+
+clock.setPeriodBars(1/16);
+
+octRange = highOctave - lowOctave;
+velRange = 127 - lowVel;
+
+
+@block
+
+clock.c_block();
+
+sampleOffset = -1;
+
+d0 = seq[0];
+d2 = seq[1];
+d3 = seq[2];
+d4 = seq[3];
+d5 = seq[4];
+d6 = seq[5];
+d7 = seq[7];
+d8 = seq[8];
+
+
+@sample
+
+tempoChanged() && clock.setPeriodBars(duration/16/16);
+
+sampleOffset += 1;
+
+while(msg.recv())
+(
+  msg.isNewTrig() && generate();
+);
+
+clock.tick() &&
+(ticked += 1;
+  nextOff != -1 && sendOff();
+  seq[next] != -1 && sendOn();
+  next += 1;
+  next >= duration && next = 0;
+);

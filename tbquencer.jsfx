@@ -1,0 +1,88 @@
+desc: gianniMIDI step input sequencer
+in_pin:none
+out_pin:none
+
+slider1:clockChan=1<1,16,1>clock channel
+slider2:clockNote=24<0,127,1>clock note
+slider3:controlChan=16<0,127,1>sequencer controls channel
+slider4:recordNote=7<0,127,1>record note
+slider5:recording=0<0,1,1>recording
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+seq.arrayInit(128);
+
+function isClockNote()
+(
+  msg.statusLo == clockChan - 1 &&
+  msg.data1 == clockNote;
+);
+
+function isRecordNote()
+(
+  msg.statusLo == controlChan - 1 &&
+  msg.data1 == recordNote;
+);
+
+next = 0;
+
+ 
+@sample
+
+while(msg.recv())
+(
+  handled = 0;
+
+  msg.isRecordNote() &&
+  (
+    msg.isNoteOn() ? 
+      (
+        recording = 1;
+        seq.default(0); // clear sequence
+        next = 0;
+      ) : (
+        recording = 0;
+      );
+    handled = 1;
+  );
+
+  // msg.isRestNote() &&
+  // (
+  //   handled = 1;
+  //   recording && msg.isNoteOn() &&
+  //   (
+  //     rest += 1;
+  //   );
+  // );
+
+  msg.isClockNote() &&
+  (
+    handled = 1;
+    msg.isNoteOn() ? (
+      !recording && (
+        seqNote.parseBits(seq.pop());
+        seqNote.offset = samplesblock;
+        seqNote.send();
+        seqNote.statusHi = 8; // prep note off
+        seq.push(seqNote.toBits());
+      );
+    ) : (
+      !recording &&
+      (
+        seqNote.parseBits(seq.pop());
+        seqNote.offset = samplesblock;
+        seqNote.send();
+      );
+    );
+  );
+
+  !handled && recording &&
+  (
+    msg.isNoteOn() && seq.push(msg.toBits())
+  );
+
+  msg.send();
+);

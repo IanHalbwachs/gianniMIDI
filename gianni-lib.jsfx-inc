@@ -4,7 +4,7 @@
 
 function round(num)
 (
-  floor(num + 0.5);
+  ceil(num - 0.5);
 );
 
 function randInt(num)
@@ -270,7 +270,7 @@ function setPeriodBars(bars) // 1/16, 1.5 etc
 (
   // seconds per beat = 60 / tempo
   // seconds per bar = beats per measure * seconds per beat
-  this.setPeriodSeconds(bars * ts_num * 60 / tempo);
+  tempo && this.setPeriodSeconds(bars * ts_num * 60 / tempo);
 );
 
 function getPhase()

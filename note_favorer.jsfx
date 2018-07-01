@@ -2,8 +2,8 @@ desc: gianniMIDI note favorer
 in_pin:none
 out_pin:none
 
-slider1:LPN=58<0,127,1>high priority note
-slider2:HPN=53<0,127,1>low priority note
+slider1:HPN=58<0,127,1>high priority note
+slider2:LPN=53<0,127,1>low priority note
 
 @init
 

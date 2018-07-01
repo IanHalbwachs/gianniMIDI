@@ -1,0 +1,78 @@
+desc: gianniMIDI scrappyseq
+in_pin:none
+out_pin:none
+
+slider1:0.1<0,0.0000000000000001>pattern1
+slider2:0.1<0,0.0000000000000001>step 1
+slider3:0.1<0,0.0000000000000001>step 2
+slider4:0.1<0,0.0000000000000001>step 3
+slider5:0.1<0,0.0000000000000001>step 4
+slider6:0.1<0,0.0000000000000001>step 5
+slider7:0.1<0,0.0000000000000001>step 6
+slider8:0.1<0,0.0000000000000001>step 7
+slider9:0.1<0,0.0000000000000001>step 8
+slider10:0.1<0,0.0000000000000001>step 9
+slider11:0.1<0,0.0000000000000001>step 10
+slider12:0.1<0,0.0000000000000001>step 11
+slider13:0.1<0,0.0000000000000001>step 12
+slider14:0.1<0,0.0000000000000001>step 13
+slider15:0.1<0,0.0000000000000001>step 14
+slider16:0.1<0,0.0000000000000001>step 15
+slider17:0.1<0,0.0000000000000001>step 16
+
+
+import gianni-lib.jsfx-inc
+
+
+@init
+
+function getInteger(num)
+(
+  num >> 0;
+);
+
+function getDecimal(num)
+(
+  num - getInteger(num);
+);
+
+function getDecimalLength(num) local (i)
+(
+  i = 0;
+  num = 0;
+  while (num > 0) (
+    num = getDecimal(num * 10);
+    i += 1;
+  );
+
+  i;
+);
+
+@slider
+
+@block
+
+_boop = 0.5;
+_boop = getDecimal(_boop);
+
+_int = getInteger(slider1);
+
+_dec = getDecimal(slider1);
+
+_len = getDecimalLength(slider1);
+
+_num = _dec * 10;
+
+_numdec = getDecimal(_num);
+
+_loop = loop(5);
+
+while(msg.recv())
+(
+  msg.isNoteOn() &&
+  (
+    cc20.send();
+    cc21.send();
+    cc22.send();
+  );
+);
