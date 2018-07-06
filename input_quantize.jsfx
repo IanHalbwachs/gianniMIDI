@@ -50,14 +50,12 @@ function dequeue(queue*)
   (
     _m = queue.pop();
     _m.parseBits();
-    _m.send();
+    _m.sendWithOffset(sampleOffset);
   );
 );
 
 onQueue.arrayInit(128);
 offQueue.arrayInit(128);
-
-clock.c_init();
 
 
 @slider
@@ -67,11 +65,14 @@ clock.setPeriodBars(1/slider1);
 
 @block
 
+sampleOffset = -1;
+
 tempoChanged() && clock.setPeriodBars(1/slider1);
-clock.c_block();
 
 
-@sample 
+@sample
+
+sampleOffset += 1;
 
 while (msg.recv())   
 (
@@ -85,11 +86,11 @@ while (msg.recv())
   (
     slider2 > 0 && (
       _pos = msg.posInQueue();
-      _pos > -1 ? cancelNoteOn(_pos) : (slider2 == 1 ? msg.send() : msg.enqNoteOff());
+      _pos > -1 ? cancelNoteOn(_pos) : (slider2 == 1 ? msg.sendWithOffset(sampleOffset) : msg.enqNoteOff());
     );
     handled = 1;
   );
-  !handled && msg.send();
+  !handled && msg.sendWithOffset(sampleOffset);
 );
 
 clock.tick() && (

@@ -9,6 +9,7 @@ slider3:0<0,127,1>status hi
 slider4:0<0,127,1>status lo
 slider5:0<0,127,1>data1
 slider6:0<0,127,1>data2
+slider7:0<0,0,1>messages received
 
 import gianni-lib.jsfx-inc
 
@@ -24,4 +25,6 @@ while (msg.recv())
   slider6 = msg.data2;
 
   msg.send();
+
+  slider7 += 1;
 );

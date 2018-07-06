@@ -21,7 +21,7 @@ msg.statusHi = 9;
 msg.data1 = 60;
 msg.data2 = 100;
 
-clock.c_init();
+clock.cInit();
 
 @slider
 
@@ -30,10 +30,14 @@ setPeriod();
 
 @block
 
+sampleOffset = -1;
+
 tempoChanged() && setPeriod();
-clock.c_block();
+
 
 
 @sample
 
-clock.tick() && msg.sendWithOffset(clock.midiOffset);
+sampleOffset += 1;
+
+clock.tick() && msg.sendWithOffset(sampleOffset);

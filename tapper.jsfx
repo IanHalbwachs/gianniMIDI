@@ -12,7 +12,7 @@ ticking = 0;
 counting = 0;
 count = 0;
 
-clock.c_init();
+clock.cInit();
 
 on.statusHi = 9;
 on.data1 = 36;
@@ -22,6 +22,8 @@ off.statusHi = 8;
 off.data1 = 36;
 
 @block
+
+sampleOffset = -1;
 
 while (msg.recv()) (
   msg.isNoteOn() &&
@@ -37,7 +39,7 @@ while (msg.recv()) (
         counting = 1;
       );
     ) : (
-      clock.c_init();
+      clock.cInit();
       ticking = 1;
       clock.period = count;
       count = 0;
@@ -46,17 +48,17 @@ while (msg.recv()) (
   );
 );
 
-clock.c_block();
-
 
 @sample
+
+sampleOffset += 1;
 
 counting ? (
   count += 1;
 ) : (
   ticking && clock.tick() &&
   (
-    off.send();
-    on.send();
+    off.sendWithOffset(sampleOffset);
+    on.sendWithOffset(sampleOffset);
   );
 );

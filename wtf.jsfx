@@ -2,35 +2,10 @@ desc: gianniMIDI wtf
 in_pin:none
 out_pin:none
 
-slider1:36<0,128,1>target base note
+slider1:0<0,2,1{foo,bar,baz}>named options
 
 import gianni-lib.jsfx-inc
 
-
 @init
 
-cc20.statusHi = 11;
-cc20.statusLo = 0;
-cc20.data1 = 20;
-cc20.data2 = 1;
-
-cc21.statusHi = 11;
-cc21.statusLo = 0;
-cc21.data1 = 21;
-cc21.data2 = 1;
-
-cc22.statusHi = 11;
-cc22.statusLo = 0;
-cc22.data1 = 22;
-cc22.data2 = 4;
-
-
-@block
-
-i = 0;
-
-while (i < samplesblock)
-(
-  midisend(i, 1, 1, 1);
-  i += 1;
-);
+debug = randInt(-5);

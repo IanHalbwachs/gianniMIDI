@@ -6,10 +6,6 @@ import gianni-lib.jsfx-inc
 
 slider1:1<1,16,1>channel
 
-@init
-
-channel = slider1 - 1;
-
 
 @slider
 

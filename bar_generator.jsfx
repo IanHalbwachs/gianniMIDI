@@ -8,7 +8,8 @@ slider3:lowVel=100<1,127,1>Low velocity
 slider4:newTrig=0<0,127,1>New sequence note
 slider5:duration=16<1,32,1>Duration (16ths)
 slider6:density=5<1,10,1>Density
-slider7:slideProb=1<0,10,1>Slide probability
+// slider7:slideProb=1<0,10,1>Slide probability
+
 import gianni-lib.jsfx-inc
 
 
@@ -25,7 +26,7 @@ cMaj.push(9);
 seq.arrayInit(32);
 seq.default(-1);
 
-clock.c_init();
+clock.cInit();
 
 next = 0;
 nextOff = -1;
@@ -35,18 +36,16 @@ off.statusHo = 8;
 
 function sendOff()
 (
-  off.offset = sampleOffset;
   off.data1 = nextOff;
-  off.send();
+  off.sendWithOffset(sampleOffset);
   nextOff = -1;
 );
 
 function sendOn()
 (
-  on.offset = sampleOffset;
   on.data1 = seq[next];
   on.data2 = lowVel + randInt(velRange);
-  on.send();
+  on.sendWithOffset(sampleOffset);
   nextOff = on.data1;
 );
 
@@ -59,7 +58,6 @@ function isNewTrig()
 function generate()
 (
   i = 0;
-  debug1=duration;
   while (i < duration)
   (
     seq[i] = (randInt(9) < density) ? cMaj[randInt(6)] + ((lowOctave + (randInt(octRange))) * 12) : -1;
@@ -77,25 +75,14 @@ velRange = 127 - lowVel;
 
 @block
 
-clock.c_block();
-
 sampleOffset = -1;
-
-d0 = seq[0];
-d2 = seq[1];
-d3 = seq[2];
-d4 = seq[3];
-d5 = seq[4];
-d6 = seq[5];
-d7 = seq[7];
-d8 = seq[8];
 
 
 @sample
 
-tempoChanged() && clock.setPeriodBars(duration/16/16);
-
 sampleOffset += 1;
+
+tempoChanged() && clock.setPeriodBars(1/16);
 
 while(msg.recv())
 (
@@ -103,7 +90,7 @@ while(msg.recv())
 );
 
 clock.tick() &&
-(ticked += 1;
+(
   nextOff != -1 && sendOff();
   seq[next] != -1 && sendOn();
   next += 1;

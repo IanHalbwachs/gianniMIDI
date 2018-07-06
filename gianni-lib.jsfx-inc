@@ -9,7 +9,7 @@ function round(num)
 
 function randInt(num)
 (
-  round(rand(num));
+  round(rand() * num);
 );
 
 function clamp(num, min, max)
@@ -279,14 +279,13 @@ function getPhase()
 );
 
 // call in @init
-function c_init()
+function cInit()
 (
-  this.init = 1;
-  this.scount = 0;
+  this.sCount = 0;
 );
 
 // // call in @block, accounts for periods of non-integer sample duration.
-// function c_block() 
+// function cBlock() 
 // (
 //   this.period && (this.scount >= (this.period + this.offset)) &&
 //   (
@@ -309,26 +308,14 @@ function c_init()
 //   );
 // );
 
-function c_block()
-( 
-  this.midiOffset = -1;
-);
 
 function tick()
 (
-  this.midiOffset += 1;
-  this.sCount < (this.period + this.offset) ? (
-    this.sCount += 1;
-    this.init ? (
-      this.init = 0;
-      1;
-    ) : (
-      0;
-    );
-  ) : (
-    this.sCount -= (this.period -1);
-    1;
-  )
+  this.offsetDiff = this.sCount - this.offset;
+  this.ticked = this.offsetDiff >= 0 && this.offsetDiff < 1;
+  this.sCount += 1;
+  this.sCount >= this.period && this.sCount -= this.period;
+  this.ticked;
 );
 
 // WIP

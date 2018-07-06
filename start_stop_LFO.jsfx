@@ -1,4 +1,4 @@
-desc: gianniMIDI start-stop LFO
+ desc: gianniMIDI start-stop LFO
 // an LFO that only runs when a note(s) is held
 
 in_pin:none
@@ -41,19 +41,12 @@ function calcShape(shape) local(phase, output)
 );
 
 
-@serialize
-
-setPeriod();
-
-
 @slider
 
 setPeriod();
 
 
 @block
-
-clock.c_block();
 
 while (msg.recv())
 (
@@ -67,4 +60,6 @@ heldNotes && slider5 = calcShape(slider4);
 
 @sample
 
-heldNotes && clock.scount += 1;
+tempochanged() && setPeriod();
+
+heldNotes && clock.tick();

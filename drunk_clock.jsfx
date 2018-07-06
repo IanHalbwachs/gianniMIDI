@@ -1,4 +1,4 @@
-desc: gianniMIDI drunk clock
+desc: gianniMIDI drunk clock 
 
 in_pin:none
 out_pin:none
@@ -22,35 +22,42 @@ on.data2 = 100;
 off.statusHi = 8;
 off.data1 = 60;
 
-soberClock.c_init();
-drunkClock.c_init();
+drunkClock.started = 0;
 
 function setPeriods()
 (
   soberClock.setPeriodBars(1 / slider1);
   drunkClock.setPeriod(soberClock.period / (slider2 - slider4));
+  soberClock.offset = slider3 * soberClock.period / slider2;
 );
+
 
 @slider
 
 setPeriods();
-soberClock.offset = slider3 * soberClock.period / slider2;
 on.data1 = slider5;
 off.data1 = on.data1;
 
 
 @block
 
-
-soberClock.c_block();
-drunkClock.c_block();
+sampleOffset = -1;
 
 
 @sample
+
+sampleOffset += 1;
+
 tempoChanged() && setPeriods();
-soberClock.tick() && drunkClock.c_init();
-drunkClock.tick() &&
+
+soberClock.tick() &&
 (
-  off.sendWithOffset(drunkClock.midiOffset);
-  on.sendWithOffset(drunkClock.midiOffset);
+  drunkClock.started = 1;
+  drunkClock.cInit();
+);
+
+drunkClock.started && drunkClock.tick() &&
+(
+  off.sendWithOffset(sampleOffset);
+  on.sendWithOffset(sampleOffset);
 );
