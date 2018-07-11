@@ -1,0 +1,13 @@
+desc: filter
+
+slider1:weight=1<0,1,0.01>cutoff
+
+@sample
+
+i = 0;
+
+while(i < 2)
+(
+  spl(i) = (spl(i) + spl(i + 2) + spl(i + 4)) / 3;
+  i += 1;
+);

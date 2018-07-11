@@ -1,15 +1,14 @@
-desc: gianniMIDI debugger
+desc: MIDI debugger
 
 in_pin:none
 out_pin:none
 
 slider1:0<0,128,1>offset
-slider2:0<0,127,1>status
-slider3:0<0,127,1>status hi
-slider4:0<0,127,1>status lo
-slider5:0<0,127,1>data1
-slider6:0<0,127,1>data2
-slider7:0<0,0,1>messages received
+slider2:0<0,127,1>status hi
+slider3:0<0,127,1>status lo
+slider4:0<0,127,1>data1
+slider5:0<0,127,1>data2
+slider6:0<0,0,1>messages received
 
 import gianni-lib.jsfx-inc
 
@@ -18,13 +17,12 @@ import gianni-lib.jsfx-inc
 while (msg.recv())
 (
   slider1 = msg.offset;
-  slider2 = (msg.statusHi << 4) + msg.statusLo;
-  slider3 = msg.statusHi;
-  slider4 = msg.statusLo;
-  slider5 = msg.data1;
-  slider6 = msg.data2;
+  slider2 = msg.statusHi;
+  slider3 = msg.statusLo;
+  slider4 = msg.data1;
+  slider5 = msg.data2;
 
   msg.send();
 
-  slider7 += 1;
+  slider6 += 1;
 );

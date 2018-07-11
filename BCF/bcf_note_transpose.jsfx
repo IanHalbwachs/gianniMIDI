@@ -15,7 +15,7 @@ while(msg.recv())
 (
   msg.statusLo == 15 &&
   (msg.statusHi == 8 || msg.statusHi == 9) &&
-  (msg.data1 > 11 || msg.data1 < 28) &&
+  msg.data1 > 11 && msg.data1 < 28 &&
   (
     msg.data1 += (slider1 - 12);
     msg.statusLo = slider2;

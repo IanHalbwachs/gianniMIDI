@@ -1,0 +1,8 @@
+desc: clipper
+
+slider1:threshold=1<0,1,0.01>threshold
+
+@sample
+
+spl0 = sign(spl0) * min(abs(spl0), threshold);
+spl1 = sign(spl1) * min(abs(spl1), threshold);

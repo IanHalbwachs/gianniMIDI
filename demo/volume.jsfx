@@ -1,0 +1,9 @@
+desc: volume
+
+slider1:volume=1<0,1,0.01>volume
+
+
+@sample
+
+spl0 = spl0 * volume;
+spl1 = spl1 * volume;

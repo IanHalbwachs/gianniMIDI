@@ -1,0 +1,14 @@
+desc: oscillator
+
+slider1:frequency=40<40,4000,0.01>frequency (hz)
+
+@slider
+
+samplePhase = frequency / srate;
+
+@sample
+
+phase += samplePhase;
+phase >= 1 && phase -= 1;
+spl0 = (2 * phase) - 1;
+spl1 = spl0;

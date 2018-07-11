@@ -1,0 +1,30 @@
+desc: delay
+
+slider1:feedback=1<0,1,0.01>feedback
+slider2:length=1<0,1,0.01>length (seconds)
+
+@init
+
+next = 0;
+buffer = 2;
+i = 0;
+
+@slider
+
+bufferSize = 2 * srate * length;
+
+@sample
+
+leftBuffer = buffer[i];
+rightBuffer = buffer[i + 1];
+
+leftOutput = leftBuffer + spl0;
+rightOutput = rightBuffer + spl1;
+
+buffer[i] = spl0 + (feedback * leftBuffer);
+buffer[i + 1] = spl1 + (feedback * rightBuffer);
+
+i < bufferSize ? i += 2 : i += (2 - bufferSize);
+
+spl0 = leftOutput;
+spl1 = rightOutput;

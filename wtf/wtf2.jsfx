@@ -1,0 +1,26 @@
+desc: gianniMIDI wtf
+in_pin:none
+out_pin:none
+
+// slider1:0<0,2,1{foo,bar,baz}>named options
+slider1:0<0,48000,1>input
+
+
+// import gianni-lib.jsfx-inc
+
+@init
+
+count = 0;
+prevSlider1 = -1;
+
+@slider
+count += 1;
+x = __memtop();
+
+// @sample
+
+// slider1 != prevSlider1 &&
+// (
+//   prevSlider1 = slider1;
+//   count += 1;
+// );

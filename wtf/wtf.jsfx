@@ -1,0 +1,19 @@
+desc: gianniMIDI wtf
+in_pin:none
+out_pin:none
+
+// slider1:0<0,2,1{foo,bar,baz}>named options
+slider1:0<0,48000,1>output
+
+
+// import gianni-lib.jsfx-inc
+
+@init
+
+count = 0;
+
+@sample
+
+slider1 = count;
+slider_automate(slider1);
+count < 48000 && count += 1;

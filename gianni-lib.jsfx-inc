@@ -14,7 +14,7 @@ function randInt(num)
 
 function clamp(num, min, max)
 (
- max(min(num, max), min);
+  max(min(num, max), min);
 );
 
 function isWithin(lo, hi, num)
@@ -70,12 +70,13 @@ function writeBits(offset, nBits, num)
 
 // * ARRAYS *//
 
+__nextArrayIdx = 0;
+
 // tenSizeArray.arrayInit(10); 
-function arrayInit(size) local (index)
+function arrayInit(size) local(index)
 (
-  index = __nextArrayIdx; // __nextArrayIdx will be globally initialized at 0 on first call;
-  __nextArrayIdx = index + size; // set up index for next call
-  this = index;
+  this = __nextArrayIdx;
+  __nextArrayIdx += size; // set up index for next call
   this.size = size;
   this.length = 0;
 );
@@ -243,22 +244,14 @@ function tempoChanged() local(return)
 
 //* CLOCK *//
 
-function pause()
+function cInit()
 (
-  this.resume = this.period;
-  this.period = 0;
-);
-
-function resume()
-(
-  this.period = this.resume;
-  this.resume = 0;
+  this.phase = 1; // ensure first tick
 );
 
 function setPeriod(samples)
 (
-  this.period = samples;
-  this.resume && this.pause(); // !!this.resume == paused
+  this.sPhase = 1 / samples;
 ); 
 
 function setPeriodSeconds(seconds)
@@ -273,59 +266,20 @@ function setPeriodBars(bars) // 1/16, 1.5 etc
   tempo && this.setPeriodSeconds(bars * ts_num * 60 / tempo);
 );
 
-function getPhase()
-(
-  phase(this.scount, this.period);
-);
-
-// call in @init
-function cInit()
-(
-  this.sCount = 0;
-);
-
-// // call in @block, accounts for periods of non-integer sample duration.
-// function cBlock() 
-// (
-//   this.period && (this.scount >= (this.period + this.offset)) &&
-//   (
-//     this.scount -= this.period;
-//     // this.period = clock.handleSwing();
-//     // this.swing && (this.period = this.handleSwing())
-//     this.ticked = 1;
-//   );
-// );
-
-// // call in @sample, will return 1 on tick.
-// function tick()
-// (
-//   this.period && (
-//     this.scount += 1;
-//     this.ticked && (
-//       this.ticked = 0;
-//       1;
-//     );
-//   );
-// );
-
-
 function tick()
 (
-  this.offsetDiff = this.sCount - this.offset;
-  this.ticked = this.offsetDiff >= 0 && this.offsetDiff < 1;
-  this.sCount += 1;
-  this.sCount >= this.period && this.sCount -= this.period;
-  this.ticked;
+  this.phase < 1 ?
+  (
+    this.phase += this.sPhase;
+    0;
+  ) : (
+    this.phase -= (1 - this.sPhase);
+    1;
+  );
 );
 
-// WIP
-// clock.setPhase(0-1)
-// clock.getPhase() // 0-1
-// clock.setPeriodSeconds(sec)
-// clock.getPeriod() // sec
-// clock.setPeriodBars(n)
-// clock.getPeriodInBars() // n
-// clock.pause() 
-// clock.resume()
-// clock.setRate(hz)
-// clock.getRate() //hz
+function offset(phaseOffset)
+(
+  this.phase = phaseOffset - this.prevPhaseOffset;
+  this.prevPhaseOffset = this.phase;
+);
