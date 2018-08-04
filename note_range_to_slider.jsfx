@@ -1,4 +1,4 @@
-desc: gianniMIDI note range to slider + note
+desc: Map Note Range to Slider + Note
 in_pin:none
 out_pin:none
 
@@ -6,7 +6,7 @@ slider1:12<0,128,1>low note
 slider2:0<0,1,0.00001>output
 slider3:36<0,127,1>output note
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 @init
 

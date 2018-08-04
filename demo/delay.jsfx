@@ -1,17 +1,13 @@
 desc: delay
 
-slider1:feedback=1<0,1,0.01>feedback
-slider2:length=1<0,1,0.01>length (seconds)
+slider1:feedback=0<0,1,0.01>feedback
+slider2:length=.5<0,1,0.01>length (seconds)
 
-@init
-
-next = 0;
-buffer = 2;
-i = 0;
 
 @slider
 
 bufferSize = 2 * srate * length;
+
 
 @sample
 
@@ -26,5 +22,5 @@ buffer[i + 1] = spl1 + (feedback * rightBuffer);
 
 i < bufferSize ? i += 2 : i += (2 - bufferSize);
 
-spl0 = leftOutput;
-spl1 = rightOutput;
+spl0 = (2 * rand()) - 1;
+spl1 = spl0;

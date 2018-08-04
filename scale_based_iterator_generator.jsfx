@@ -1,12 +1,13 @@
-desc: Step Input Sequencer (GianniMIDI)
+desc: Scale Based Iterator Generator (GianniMIDI)
 in_pin:none
 out_pin:none
 
 import my-lib.jsfx-inc
 
-slider1:CLOCK_NOTE=4<0,127,1>clock note
-slider2:clockChannel=16<1,16,1>clock channel
-slider3:controlChannel=16<1,16,1>control channel
+slider1:controlChannel=16<1,16,1>control channel
+slider2:LISTEN_NOTE=4<0,127,1>listen note
+slider2:GENERATE_NOTE=4<0,127,1>generate note
+slider2:TRIGGER_NOTE=4<0,127,1>trigger note
 
 
 @init
@@ -24,7 +25,7 @@ next = 0;
 tie = 0;
 cursor = -1;
 
-sequence.arrayInit(256);
+sequence.arrayInit(32);
 sequence.default(-1);
 
 function reset()
@@ -43,27 +44,21 @@ function reset()
 
 function isAdvance()
 (
-  this.isNoteOn() &&  (this.note() == CLOCK_NOTE) && (this.channel() == CLOCK_CHANNEL);
+  this.isNoteOn() &&  (this.note() == TRIGGER_NOTE) && (this.channel() == CLOCK_CHANNEL);
 );
 
 function advance()
 (
   offset = msg.offset;
   off = sequence[cursor];
-  off !== -1 &&
-  (
-    off.parseBits();
-    off.statusHi = 8;
-    off.sendWithOffset(offset);
-  );
+  off.parseBits();
+  off.statusHi = 8;
+  off.sendWithOffset(offset);
   cursor += 1;
   cursor >= sequence.length && cursor = 0;
   msg = sequence[cursor];
-  msg !== -1 &&
-  (  
-    msg.parseBits();
-    msg.sendWithOffset(offset);
-  );
+  msg.parseBits();
+  msg.sendWithOffset(offset);
   handled = 1;
 );
 
@@ -75,10 +70,6 @@ function handleState()
       msg.note() == NEXT_ && next = 1;
       msg.note() == PREV_ && prev = 1;
       msg.note() == TIE_ && tie = 1;
-      learn && next && (
-        sequence.push(-1);
-        next = 0;
-      );
       handled = 1;
     );
     msg.isNoteOff() && (
@@ -89,16 +80,12 @@ function handleState()
       handled = 1;
     );
   );
-  !learn && (
-    next && prev && reset();
-    msg.isAdvance() && advance();
-  );
+  !learn && next && prev && reset();
 );
 
 
 @slider
 
-CLOCK_CHANNEL = clockChannel - 1;
 CONTROL_CHANNEL = controlChannel - 1;
 
 
@@ -110,11 +97,14 @@ while(msg.recv())
 (
   handled = 0;
   handleState();
-  !handled &&
-  (
-    learn && msg.isNoteOn() && sequence.push(msg.toBits());
-    msg.send();
+  !learn && msg.isAdvance() && advance();
+  !handled && (
+    learn &&
+    (
+      !next && !prev && !tie && msg.isNoteOn() && sequence.push(msg.toBits());
+    );
   );
+  !handled && msg.send();
 );
 
 

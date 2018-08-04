@@ -1,4 +1,4 @@
-desc: gianniMIDI note iterator
+desc: Note Iterator (GianniMIDI)
 in_pin:none
 out_pin:none
 
@@ -7,11 +7,9 @@ slider2:32<0,127,1>from note
 slider3:47<0,127,1>to note
 slider4:1<0,1,1{no,yes}>bind reset to range
 slider5:16<0,127,1>reset after n iterations
-slider6:0<0,2,1{n/a,restart,reverse}>reset > range behavior
-// rotate
-// offset
+slider6:0<0,2,1{n/a,restart,reverse}>reset > range wrap behavior
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @init

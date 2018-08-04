@@ -1,0 +1,33 @@
+desc: monosynth
+
+slider1:volume=1<0,1,0.01>volume 
+
+import my-lib.jsfx-inc
+
+
+@init
+
+function setClockFromNote()
+(
+  frequency = (2 ^ ((this.note() - 69) / 12)) * 440;
+  clock.setPeriodSeconds(1 / frequency);
+);
+
+
+
+@sample
+
+while(msg.recv())
+(
+  msg.isNoteOn() &&
+  (
+    active = 1;
+    msg.setClockFromNote();
+  );
+  msg.isNoteOff() && active = 0;
+);
+
+clock.tick();
+
+spl0 = active ? ((2 * clock.phase) - 1) * volume : 0;
+spl1 = spl0;

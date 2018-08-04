@@ -1,0 +1,62 @@
+desc: MIDI Clock (GianniMIDI) 
+
+in_pin:none
+out_pin:none
+
+slider1:4<1, 64, 1>period in 1/n bars (0 -> use seconds);
+slider2:1<0.01, 1, .001>period in seconds;
+slider3:36<0,127,1>clock note
+slider4:1<1,16,1>clock channel
+
+
+import my-lib.jsfx-inc
+
+
+@init
+
+function setPeriod() 
+(
+  slider1 ? clock.setPeriodBars(1/slider1) : clock.setPeriodSeconds(slider2);
+);
+
+msg.statusHi = 9;
+msg.statusLo = slider4 - 1;
+msg.data1 = slider3;
+msg.data2 = 127;
+
+off.statusHi = 8;
+off.statusLo = msg.statusLo;
+off.data1 = msg.data1;
+off.data2 = 0;
+
+clock.cInit();
+
+
+@slider
+
+setPeriod();
+
+msg.data1 = slider3;
+msg.statusLo = slider4 - 1;
+
+
+
+@block
+
+sampleOffset = -1;
+
+
+@sample
+
+tempoChanged() && setPeriod();
+
+sampleOffset += 1;
+
+clock.tick() && (
+  off.sendWithOffset(sampleOffset);
+  msg.sendWithOffset(sampleOffset);
+  off.statusHi = 8;
+  off.statusLo = msg.statusLo;
+  off.statusLo = msg.statusLo;
+  off.data2 = 0;
+);

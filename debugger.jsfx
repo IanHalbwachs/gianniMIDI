@@ -3,26 +3,37 @@ desc: MIDI debugger
 in_pin:none
 out_pin:none
 
-slider1:0<0,128,1>offset
-slider2:0<0,127,1>status hi
-slider3:0<0,127,1>status lo
-slider4:0<0,127,1>data1
-slider5:0<0,127,1>data2
+slider1:offset=0<0,128,1>offset
+slider2:statusHi=0<0,127,1>status hi
+slider3:statusLo=0<0,127,1>status lo
+slider4:data1=0<0,127,1>data1
+slider5:data2=0<0,127,1>data2
 slider6:0<0,0,1>messages received
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 @block
 
-while (msg.recv())
-(
-  slider1 = msg.offset;
-  slider2 = msg.statusHi;
-  slider3 = msg.statusLo;
-  slider4 = msg.data1;
-  slider5 = msg.data2;
+//while (midirecv(m0, m1, m2, m3))
+//(
+//  offset = m0;
+//  statusHi = m1 >> 4;
+//  statusLo = m1 & $~4;
+//  data1 = m2;
+//  data2 = m3;
+  
+//  midisend(m0, m1, m2, m3);
+//);
 
-  msg.send();
+ while (msg.recv())
+ (
+   offset = msg.offset;
+   statusHi = msg.statusHi;
+   statusLo = msg.statusLo;
+   data1 = msg.data1;
+   data2 = msg.data2;
 
-  slider6 += 1;
-);
+   msg.send();
+
+   slider6 += 1;
+ );

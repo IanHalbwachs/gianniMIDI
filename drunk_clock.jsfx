@@ -1,41 +1,40 @@
-desc: gianniMIDI drunk clock 
+desc: DrunkClock (GianniMIDI)
 
 in_pin:none
 out_pin:none
 
 slider1:8<1,16,1>sober period (1/n bars)
 slider2:2<1,8,1>drunk period (sober period /n)
-slider3:0<0,4,1>offset n drunk periods
-slider4:0<-1,1,.01>drunk factor
-slider5:60<0,127,1>output note
+slider3:0<-1,1,.01>drunk factor
+slider4:60<0,127,1>output note
 
-
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @init
 
 on.statusHi = 9;
+on.statusLo = 15;
 on.data1 = 60;
 on.data2 = 100;
 
 off.statusHi = 8;
+off.statusLo = 15;
 off.data1 = 60;
-
-drunkClock.started = 0;
 
 function setPeriods()
 (
   soberClock.setPeriodBars(1 / slider1);
-  drunkClock.setPeriod(soberClock.period / (slider2 - slider4));
-  soberClock.offset = slider3 * soberClock.period / slider2;
+  drunkClock.setPeriod(soberClock.period / (slider2 - slider3));
 );
+
+soberClock.cInit();
 
 
 @slider
 
 setPeriods();
-on.data1 = slider5;
+on.data1 = slider4;
 off.data1 = on.data1;
 
 
@@ -52,11 +51,10 @@ tempoChanged() && setPeriods();
 
 soberClock.tick() &&
 (
-  drunkClock.started = 1;
   drunkClock.cInit();
 );
 
-drunkClock.started && drunkClock.tick() &&
+drunkClock.tick() &&
 (
   off.sendWithOffset(sampleOffset);
   on.sendWithOffset(sampleOffset);

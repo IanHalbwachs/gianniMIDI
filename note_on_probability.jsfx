@@ -1,11 +1,11 @@
-desc: gianniMIDI note on probablility
+desc: Note On Probablility (GianniMIDI)
 
 in_pin:none
 out_pin:none
 
 slider1:0<0,100,1>probablility
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @block

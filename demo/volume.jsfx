@@ -1,9 +1,9 @@
-desc: volume
+desc: volume fader
 
-slider1:volume=1<0,1,0.01>volume
+slider1:1<0,1,0.01>volume 
 
 
 @sample
 
-spl0 = spl0 * volume;
-spl1 = spl1 * volume;
+spl0 = spl0 * slider1;
+spl1 = spl1 * slider1;  

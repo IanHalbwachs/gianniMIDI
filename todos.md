@@ -1,3 +1,29 @@
+scaled based iterator
+random pulse generatorb  
+
+
+step seq reset on stop?
+
+clock run on play only?
+
+///
+
+clock: working, , note off, output note, phase, play state
+phrase generator: working, need note chooser, pass thru?
+drunk clock: working, output note, counters so -drunk values only tick n times
+live input quantize: ok
+note iterator: ok, doco
+note off eater: ok, make proper sustain - with learn?
+note on probability: ok
+range to slider: set range, include 1
+note transpose prob: ok
+note cluster: ok, save chords to keys, use scales
+snippets: more
+
+should default reset length of array?
+///
+
+
 * ~~nrpn -> slider fx~~
 
 * ~~balance() fn for when counting samples + period is non-integer -> period.balance() would return floor or ceil depending on some logic // if you're running into trouble syncing samples to beat positions you should probably be using bpos - maybe possible to have a sync/playstate-aware phase fn?~~
@@ -8,7 +34,7 @@
 
 * keyrange controlled LFO
 
-* pentastrum - say you play a note a fifth down from the prevvious, will strum/hold chord on the way down. some implementation of local max and minima as well
+* pentastrum - say you play a note a fifth down from the prevvious, will strum/hold chord on the way down. some implementation of local max and minima as  // what chord?? 
 
 * chordFarm
 

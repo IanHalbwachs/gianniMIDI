@@ -1,4 +1,4 @@
- desc: gianniMIDI start-stop LFO
+desc: Start-Stop LFO (GianniMIDI)
 // an LFO that only runs when a note(s) is held
 
 in_pin:none
@@ -10,7 +10,7 @@ slider3:0<0,127,1>trigger note (0 = all)
 slider4:0<0,3,1{sine,triangle,ramp,slide}>shape
 slider5:0<0,1,0.0001>output
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @init
@@ -22,20 +22,19 @@ function setPeriod()
   slider1 ? clock.setPeriodSeconds(slider1) : clock.setPeriodBars(slider2);
 );
 
-function calcShape(shape) local(phase, output)
+function calcShape(shape) local(output)
 (
-  phase = clock.getPhase();
   shape == 0 && (
-    output = (sin(2 * $pi * (phase - .25)) + 1) / 2; // sine
+    output = (sin(2 * $pi * (clock.phase - .25)) + 1) / 2; // sine
   );
   shape == 1 && (
-    output = phase <= .5 ? (2 * phase) : 2 * (1 - phase) // triangle
+    output = clock.phase <= .5 ? (2 * clock.phase) : 2 * (1 - clock.phase) // triangle
   );
   shape == 2 && (
-    output = phase; // ramp
+    output = clock.phase; // ramp
   );
   shape == 3 && (
-    output = 1 - phase; // slide
+    output = 1 - clock.phase; // slide
   );
   output;
 );

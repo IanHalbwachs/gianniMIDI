@@ -1,4 +1,4 @@
-desc:gianniMIDI random note cluster
+desc: Random Note Cluster (gianniMIDI)
 
 slider1:24<1,127,1>low note
 slider2:60<1,127,1>high note
@@ -9,7 +9,7 @@ slider3:4<1,16,1># notes
 //slider6:1<1,16,1>channels (1 to n)
 //slider7:1<0,1,1>channel order: random||iterate
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @init

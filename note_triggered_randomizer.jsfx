@@ -1,4 +1,4 @@
-desc: gianniMIDI note triggered randomizer
+desc: Note Triggered Randomizer (GianniMIDI)
 in_pin:none
 out_pin:none
 
@@ -6,7 +6,7 @@ slider1:0<0,1,.001>output
 slider2:16<0,32,1>increment by 1/n (0 = smooth)
 slider3:0<0,1,1{polyphonic,monophonic}>behavior
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @slider

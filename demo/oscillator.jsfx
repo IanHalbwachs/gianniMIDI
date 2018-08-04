@@ -1,6 +1,7 @@
 desc: oscillator
 
-slider1:frequency=40<40,4000,0.01>frequency (hz)
+slider1:frequency=40<40,400,0.01>frequency (hz)
+slider2:volume=.5<0,1,0.01>volume 
 
 @slider
 
@@ -10,5 +11,5 @@ samplePhase = frequency / srate;
 
 phase += samplePhase;
 phase >= 1 && phase -= 1;
-spl0 = (2 * phase) - 1;
+spl0 = ((2 * phase) - 1) * volume;
 spl1 = spl0;

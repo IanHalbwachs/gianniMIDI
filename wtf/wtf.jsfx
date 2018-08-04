@@ -1,19 +1,19 @@
 desc: gianniMIDI wtf
-in_pin:none
-out_pin:none
+s
 
 // slider1:0<0,2,1{foo,bar,baz}>named options
-slider1:0<0,48000,1>output
+// slider1:0<0,1,.01>output
 
 
-// import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 @init
 
-count = 0;
 
-@sample
+@block
 
-slider1 = count;
-slider_automate(slider1);
-count < 48000 && count += 1;
+while(msg.recv())
+(
+  msg.note() == 39 && msg.data1 = 40;
+  msg.send();
+);

@@ -1,4 +1,4 @@
-desc: gianniMIDI C maj generator
+desc: Phrase Generator (GianniMIDI) // currently Cmaj
 in_pin:none
 out_pin:none
 
@@ -10,7 +10,7 @@ slider5:duration=16<1,32,1>Duration (16ths)
 slider6:density=5<1,10,1>Density
 // slider7:slideProb=1<0,10,1>Slide probability
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @init

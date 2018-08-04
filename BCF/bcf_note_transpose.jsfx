@@ -6,7 +6,7 @@ out_pin:none
 slider1:36<0,128,1>target base note
 slider2:1<0,16,1>channel
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
  
 
 @block

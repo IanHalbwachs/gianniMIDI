@@ -1,0 +1,296 @@
+@init
+
+//* MATH *//
+
+function round(num) local (int)
+(
+  int = floor(num);
+  num - int < 0.5 ? floor(num) : ceil(num);
+);
+
+function randInt(num)
+(
+  round(rand() * num);
+);
+
+function clamp(num, min, max)
+(
+  max(min(num, max), min);
+);
+
+function isWithin(lo, hi, num)
+(
+  num >= lo && num <= hi;
+);
+
+function phase(elapsed, period) local(quotient, return) // phase(12, 8) = .5
+(
+  return = 0;
+  period &&
+  (
+    elapsed < period ?
+      (
+        return = elapsed / period;
+      ) :
+      (
+        quotient = elapsed / period;
+        // decimal = quotient - quotient<<0
+        return = (quotient - quotient<<0);
+      );
+  );
+  return;
+);
+
+function mask(n)
+(
+  pow(2, n)-1;
+);
+
+// foo.readBits(6, 3) will read bits 7 thru 9 as if they were their own 3-bit integer
+function readBits(offset, nBits)
+(
+  // foo = 1101111111
+  // shifted right 6 bits = 1101
+  // 1101 masked by 111 = 0101 = 5
+  (this >> offset) & mask(nBits);
+);
+
+// foo.writeBits(6, 3, 2) will write the number 2 into bits 7 thru 9
+// (num must fit in numBits else good luck using this as intended)
+function writeBits(offset, nBits, num)
+(
+  // subtract whatever value is in those bits
+  // 1XXX111111 -= (XXX << 6) = 1000111111
+  this -= this.readBits(offset, nBits) << offset;
+  // add num back into that n bit hole
+  // 1000111111 + (2 << 6) = 1010111111
+  this += num << offset;
+  // -> foo.readBits(3, 6) = 010 = 2
+);
+
+
+// * ARRAYS *//
+
+__nextArrayIdx = 0;
+
+// tenSizeArray.arrayInit(10); 
+function arrayInit(size) local(index)
+(
+  this = __nextArrayIdx;
+  __nextArrayIdx += size; // set up index for next call
+  this.size = size;
+  this.length = 0;
+);
+
+// tenSizeArray.default(-1)
+function default(def) local(i)
+(
+  i = 0;
+  while(i < this.size)
+  (
+    this[i] = def;
+    i+= 1;
+  );
+);
+
+// tenSizeArray.push(foo)
+function push(value)
+(
+  this.length < this.size && (
+    this[this.length] = value;
+    this.length += 1;
+  );
+);
+
+// tenSizeArray.pop()
+function pop() local (return)
+(
+  this.length > 0 ? (
+    this.length -=1;
+    return = this[this.length];
+  ) : (
+    // 😒 no way to indicate array was empty, 0 seems like "least spurious" value to return here
+    return = 0; 
+  );
+  return;
+);
+
+function find(value) local (return, i)
+(
+  return = -1;
+  i = 0;
+  while ((return == -1) && (i < this.length))
+  (
+    value == this[i] && return = i;
+    i += 1;
+  );
+  return; // will return -1 or the first index containing the value
+);
+
+
+//* MIDI *//
+
+// wrap midirecv and interpret values
+// usage: while(msg.recv()) (msg.send())
+function recv() local(received)
+(
+  //capture return value of midirecv and scope its args
+  received = midirecv(m0, m1, m2, m3);
+  received && 
+  (
+    this.offset = m0;
+    // m1 = status byte, some 8 bit number;
+    // shift away lowest 4 bits: 1111???? -> 1111
+    this.statusHi = m1 >> 4;
+    // mask top 4 bits: ????1010 & 00001111 -> 00001010
+    this.statusLo = m1 & $~4;
+    this.data1 = m2;
+    this.data2 = m3;
+  );
+  // return 1 or 0 for while() evaluation;
+  received;
+);
+
+
+function send()
+(
+  midisend(
+    this.offset,
+    // reconstruct status by shifting high bits to the left
+    // 1111 -> 11110000
+    ((this.statusHi << 4) + this.statusLo),
+    this.data1,
+    this.data2
+  );
+);
+
+
+function sendWithOffset(offset)
+(
+  midisend(
+    offset,
+    ((this.statusHi << 4) + this.statusLo),
+    this.data1,
+    this.data2
+  )
+);
+
+function isNoteOn()
+(
+  this.statusHi == 9 && this.data2;
+);
+
+
+function isNoteOff()
+(
+  this.statusHi == 8 || (!this.data2 && this.statusHi == 9);
+);
+
+
+function note()
+(
+  this.data1;
+);
+
+function channel()
+(
+  this.statusLo;
+);
+
+
+function isCC()
+(
+  this.statusHi == 11;
+);
+
+// usage: msg.recv(),
+// x = msg.toBits() -> now x is a number you can store in an array or whatever
+function toBits()
+(
+  this.statusHi << 18 +
+  this.statusLo << 14 +
+  this.data1 << 7 +
+  this.data2;
+);
+// x.parseBits() -> x is still a number but now has msg properties as well
+// x.send();
+function parseBits()
+(
+  this.statusHi = this.readBits(18, 4);
+  this.statusLo = this.readBits(14, 4);
+  this.data1 = this.readBits(7, 7);
+  this.data2 = this.readBits(0, 7);
+);
+// ^^ nb. you can mutate x.foo then call x = x.toBits() again if need be
+
+function sanitizeNoteOffs()
+(
+  this.statusHi == 9 && this.data2 == 0 && this.statusHi = 8;
+);
+
+
+//* STATE *//
+
+_prevTempo = tempo;
+_prevPlayState = play_state;
+
+function playChanged() local(return)
+(
+  return = _prevPlayState !== play_state;
+  return && _prevPlayState = play_state;
+  return;
+);
+
+function tempoChanged() local(return)
+(debug += 1;
+  return = _prevTempo !== tempo;
+  return && _prevTempo = tempo;
+  return;
+);
+
+
+//* CLOCK *//
+
+function cInit()
+(
+  this.phase = 1; // ensure first tick
+);
+
+function tick() // call in @sample, will return 1 when phase rolls over
+(
+  this.phase < 1 ?
+  (
+    this.phase += this.sPhase;
+    0;
+  ) : (
+    while (this.phase >= 1) (
+      this.phase -= 1;
+    );
+    this.phase += this.sphase;
+    1;
+  );
+);
+
+function setPeriod(samples)
+(
+  this.sPhase = 1 / max(samples, 1); // disallow periods of less than 1 sample
+  this.period = samples;
+); 
+
+function setPeriodSeconds(seconds)
+(
+  this.setPeriod(seconds * srate); // 👀 may be non-integer
+);
+
+function setPeriodBars(bars) // 1/16, 1.5 etc
+(
+  // seconds per beat = 60 / tempo
+  // seconds per bar = beats per measure * seconds per beat
+  tempo && this.setPeriodSeconds(bars * ts_num * 60 / tempo);
+);
+
+function offset(phaseOffset)
+(
+  this.phase = phaseOffset - this.prevPhaseOffset;
+  this.prevPhaseOffset = this.phase;
+);

@@ -1,4 +1,4 @@
-desc: gianniMIDI note transpose probability
+desc: Note Teanspose Probability (GianniMIDI)
 
 in_pin:none
 out_pin:none
@@ -8,7 +8,7 @@ slider2:0<-12,12,1>interval B
 slider3:0<0,100>transpose weight A<>B
 slider4:0<10,100,1>transpose probability
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 
 @init

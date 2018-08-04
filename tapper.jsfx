@@ -2,7 +2,7 @@ desc: gianniMIDI tapper
 in_pin:none
 out_pin:none
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 @init
 

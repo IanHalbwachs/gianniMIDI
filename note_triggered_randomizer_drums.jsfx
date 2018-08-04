@@ -1,0 +1,54 @@
+desc: Intelligent Auto Chopper (GianniMIDI)
+in_pin:none
+out_pin:none
+
+slider1:output=0<0,1,.001>output
+slider2:lowNote=36<0,127,1>low output note
+slider3:highNote=36<0,127,1>high output note
+slider4:bars=2<0,8,1>break length (bars)
+slider5:busy=.5<0,1,0.1>busyness
+
+import my-lib.jsfx-inc
+
+@init
+
+odd = 0;
+
+on.statusHi = 9;
+on.data2 = 127;
+on.data1 = lowNote;
+
+off.statusHi = 8;
+
+clock.cInit();
+
+
+@slider
+
+eighths = bars * 8;
+eighth = 1 / eighths;
+teenth = eighth / 2;
+highNote < lowNote && highNote = lowNote;
+range = highNote - lowNote;
+
+@block
+
+sampleOffset = -1;
+
+
+@sample
+
+sampleOffset += 1;
+
+tempoChanged() && clock.setPeriodBars(1/16);
+
+clock.tick() && (
+  (rand() < busy) && ( 
+    output = (floor(rand() * eighths) * eighth) + (odd ? teenth : 0);
+    off.data1 = on.data1;
+    off.send();
+    on.data1 = lowNote + randInt(range);
+    on.send();
+  );
+  odd = !odd;
+);

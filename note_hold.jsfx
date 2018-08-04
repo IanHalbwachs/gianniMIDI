@@ -1,8 +1,8 @@
-desc: gianniMIDI note_hold
+desc: Note Hold (GianniMIDI)
 in_pin:none
 out_pin:none
 
-import gianni-lib.jsfx-inc
+import my-lib.jsfx-inc
 
 slider1:globo:=0<0,1,1{per channel, all channels}>behavior
 
