@@ -1,0 +1,8 @@
+desc: Mute While Playing (GianniMIDI) 
+
+@sample
+
+mute = (play_state % 2);
+
+spl0 = mute ? 0 : spl0; 
+spl1 = mute ? 0 : spl1;

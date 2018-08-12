@@ -1,0 +1,85 @@
+desc: gianniMIDI BCF pad mapper
+
+import my-lib.jsfx-inc
+
+@init
+
+function isPad()
+(
+  (this.statusHi == 9 || this.statusHi == 8) &&
+  this.statusLo == 15 &&
+  this.data1 > 11 &&
+  this.data1 < 28;
+);
+
+function isIncrement()
+(
+  this.statusLo == 15 &&
+  this.data1 == 3;
+);
+
+function isDecrement()
+(
+  this.statusLo == 15 &&
+  this.data1 == 1;
+);
+
+pads.arrayInit(16);
+
+
+lastTouched = -1;
+
+@block
+
+while(msg.recv())
+(
+  msg.isPad() && (
+    msg.isNoteOn() && lastTouched = msg.data1;
+    msg.data1 = pads[msg.data1 - 12];
+    msg.statusLo = 0;
+  );
+  msg.isIncrement() && (
+    msg.isNoteOn() ? (
+      (lastTouched != -1) && (
+        next = min(127, pads[lastTouched - 12] + 1);
+        pads[lastTouched - 12] = next;
+        msg.statusLo = 0;
+        msg.data1 = next;
+      );
+    ) : (
+      msg.statusLo = 0;
+      msg.data1 = pads[lastTouched];
+    );
+  );
+  msg.isDecrement() && (
+    msg.isNoteOn() ? (
+      (lastTouched != -1) && (
+        next = max(0, pads[lastTouched -12] - 1);
+        pads[lastTouched -12] = next;
+        msg.statusLo = 0;
+        msg.data1 = next;
+      );
+    ) : (
+      msg.statusLo = 0;
+      msg.data1 = pads[msg.data1];
+    );
+  );
+  msg.send();
+);
+
+p0 = 0[0];
+p1 = 0[1];
+p2 = 0[2];
+p3 = 0[3];
+p4 = 0[4];
+p5 = 0[5];
+p6 = 0[6];
+p7 = 0[7];
+p8 = 0[8];
+p9 = 0[9];
+p10 = 0[10];
+p11 = 0[11];
+p12 = 0[12];
+p13 = 0[13];
+p14 = 0[14];
+p15 = 0[15];
