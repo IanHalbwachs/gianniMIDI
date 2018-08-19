@@ -1,21 +1,21 @@
-desc: Map Note Range to Slider + Note
+desc: Map Note Range to Slider + Note (GianniMIDI)
 in_pin:none
 out_pin:none
 
-slider1:12<0,128,1>low note
-slider2:0<0,1,0.00001>output
-slider3:36<0,127,1>output note
+slider1:lowNote=12<0,128,1>low note
+slider2:iterations=16<1,64,1>iterations
+slider3:output=0<0,1,0.00001>output
+slider4:outputNote=36<0,127,1>output note
+slider5:outputChannel=1<1,16,1>output channel
 
 import my-lib.jsfx-inc
 
-@init
 
-step = 1 / 16;
-channel = 0;
+@init
 
 function calcOutput()
 (
-  (this.data1 - slider1) * step;
+  (this.data1 - lowNote) / iterations;
 );
 
 
@@ -23,17 +23,17 @@ function calcOutput()
 
 while(msg.recv())
 (
-  msg.isNoteOn() && isWithin(slider1, (slider1 + 15), msg.data1) &&
+  msg.isNoteOn() && isWithin(lowNote, (lowNote + iterations - 1), msg.data1) &&
   (
-    slider2 = msg.calcOutput();
-    msg.data1 = slider3;
-    msg.statusLo = channel;
+    output = msg.calcOutput();
+    msg.data1 = outputNote;
+    msg.statusLo = outputChannel - 1;
   );
-  msg.isNoteOff() && isWithin(slider1, (slider1 + 15), msg.data1) &&
+  msg.isNoteOff() && isWithin(lowNote, (lowNote + iterations - 1), msg.data1) &&
   (
     msg.sanitizeNoteOffs();
-    msg.data1 = slider3;
-    msg.statusLo = channel;
+    msg.data1 = outputNote;
+    msg.statusLo = outputChannel - 1;
   );
   msg.send();
 );

@@ -12,6 +12,12 @@ slider6:0<0,0,1>messages received
 
 import my-lib.jsfx-inc
 
+
+@init
+
+array.arrayInit(10);
+array.push(10);
+
 @block
 
 //while (midirecv(m0, m1, m2, m3))

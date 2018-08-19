@@ -1,0 +1,150 @@
+// assign notes to groups, monophonically trigger notes from a group (random/round robin)
+
+desc: Triage (GianniMIDI)
+in_pin:none
+out_pin:none
+
+slider1:_outChan=2<1,16,1>output channel
+slider2:outNote=1<0,127,1>output note
+slider3:outNoteGroup=<0,8, 1>output note group (read/write)
+// out note weight (if random)
+slider4:_inChan=1<1,16,1>input channel
+slider5:inBaseNote=36<0,127,1>group 1 input note
+// random/round robin
+slider6:debugIndex=1<1,100,1>debug index
+slider7:_debugValue=<1,1,1>debug value
+
+import my-lib.jsfx-inc
+
+
+@init
+
+debugArray = outNoteGroups;
+
+outNoteGroups.arrayInit(128); // index == note, value == assigned group
+group1.arrayInit(128); // list of note numbers in this group
+group2.arrayInit(128);
+group3.arrayInit(128);
+group4.arrayInit(128);
+group5.arrayInit(128);
+group6.arrayInit(128);
+group7.arrayInit(128);
+group8.arrayInit(128);
+offNotes.arrayInit(8); // index == group, value == last note played from this group
+
+function clearGroups()
+(
+  group1.default(0);
+  group2.default(0);
+  group3.default(0);
+  group4.default(0);
+  group5.default(0);
+  group6.default(0);
+  group7.default(0);
+  group8.default(0);
+);
+
+function populateGroups() local (i, n)
+(
+  clearGroups();
+  i = 0;
+  while (i < outNoteGroups.size) (
+    n = outNoteGroups[i];
+    n == 1 && group1.push(n);
+    i += 1;
+  );
+);
+
+function isOutputNote()
+( 
+  (this.channel() == outChan)
+  && this.isNote();
+);
+
+function isInputNote()
+(
+  (this.channel() == inChan)
+  && this.isNote()
+  && this.note() >= inBaseNote
+  && this.note() <= maxInNote;
+);
+
+outNote.sliderWatch();
+outNoteGroup.sliderWatch();
+outNoteIsDown = -1;
+
+
+@slider
+
+
+// interestingly (this was when prev pointed to the previous, previous value, but still...)
+//
+// _inChan.sliderChanged() && (_inChan == _outChan) && 
+// (
+//   _prev = _inChan.prev;   // _inChan = _inChan.prev doesn't seem work in @slider.
+//   _inChan = _prev;        // maybe because it's a slider variable? it works in @block... o_O
+//   _inChan.sliderWatch();
+// );
+
+// sanitize channels
+_outChan == _inChan &&
+( 
+  _outChan != _outChan.prev ?
+  (
+    _outChan = _outChan.prev;
+  ) : (
+    _inChan = _inChan.prev;
+  );
+);
+
+// write
+outNoteGroup.sliderChanged() &&
+( 
+  outNoteGroups[outNote] = outNoteGroup;
+  populateGroups();
+);
+
+// read
+outNote.sliderChanged() &&
+(
+  outNoteGroup = outNoteGroups[outNote];
+  sliderchange(outNoteGroup);
+);
+
+
+// calculate constants
+outChan = _outChan - 1;
+inChan = _inChan - 1;
+maxInNote = inBaseNote + 7;
+
+@block
+
+//debuggery//
+__debugValue = debugArray[debugIndex];
+/////////////
+
+while(msg.recv())
+(
+  handled = 0;
+
+  msg.isOutputNote() &&
+  (
+    msg.isNoteOn() && outNoteIsDown == -1 &&
+    (
+      outNoteIsDown = msg.note();
+      outNote = msg.note();
+
+      // outNoteGroup = outNoteGroups[outNote];
+    );
+    msg.isNoteOff() &&  msg.note() == outNoteIsDown && outNoteIsDown = -1;
+  );
+
+
+
+  //debuggery//
+  msg.isOutputNote() ? __isOutNote = 1 : __isOutNote = 0;
+  msg.isInputNote() ? __isInNote = 1 : __isInNote = 0;
+  /////////////
+
+
+);

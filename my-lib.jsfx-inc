@@ -91,6 +91,7 @@ function default(def) local(i)
     this[i] = def;
     i+= 1;
   );
+  this.length = 0;
 );
 
 // tenSizeArray.push(foo)
@@ -125,6 +126,12 @@ function find(value) local (return, i)
     i += 1;
   );
   return; // will return -1 or the first index containing the value
+);
+
+function random() local(i)
+(
+  i = randInt(this.length - 1);
+  this[i];
 );
 
 
@@ -184,6 +191,11 @@ function isNoteOn()
 function isNoteOff()
 (
   this.statusHi == 8 || (!this.data2 && this.statusHi == 9);
+);
+
+function isNote()
+(
+  this.isNoteOn() || this.isNoteOff();
 );
 
 
@@ -246,6 +258,24 @@ function tempoChanged() local(return)
   return = _prevTempo !== tempo;
   return && _prevTempo = tempo;
   return;
+);
+
+//* SLIDER *//
+
+// call in @init
+function sliderWatch()
+(
+  this.prev = this;
+);
+
+// call in @block
+function sliderChanged()
+(
+  this !== this.prev &&
+  (
+    this.prev = this;
+    1;
+  );
 );
 
 

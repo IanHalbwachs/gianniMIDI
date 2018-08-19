@@ -36,7 +36,6 @@ function reset()
   off.statusHi = 8;
   off.sendWithOffset(offset);
   sequence.default(-1);
-  sequence.length = 0;
   next = 0;
   prev = 0;
   cursor = -1;
