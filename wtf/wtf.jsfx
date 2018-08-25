@@ -1,19 +1,35 @@
-desc: gianniMIDI wtf
-s
+desc: WTF (GianniMIDI)
 
-// slider1:0<0,2,1{foo,bar,baz}>named options
-// slider1:0<0,1,.01>output
-
+slider1:foo=5<0,10,1>foo
+slider2:bar=5<0,10,1>foo
 
 import my-lib.jsfx-inc
 
 @init
 
+foo.watch();
+bar.watch();
+
+@slider
+
+bar.changed() ? foo = 2 * bar : foo.changed() && bar = 2 * foo;
+
+// debug increases but slider is not forced to 5
+// foo.changed() &&
+// (
+//   debug += 1;
+//   foo != 5 && foo = 5;
+// );
+
+// works
+// foo.prev != foo &&
+// (
+//   debug += 1;
+//   foo.prev = foo;
+//   foo != 5 && foo = 5;
+// );
 
 @block
 
-while(msg.recv())
-(
-  msg.note() == 39 && msg.data1 = 40;
-  msg.send();
-);
+
+

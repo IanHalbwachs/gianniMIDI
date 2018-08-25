@@ -73,7 +73,7 @@ function writeBits(offset, nBits, num)
 
 __nextArrayIdx = 0;
 
-// tenSizeArray.arrayInit(10); 
+// tenSizeArray.arrayInit(10);
 function arrayInit(size) local(index)
 (
   this = __nextArrayIdx;
@@ -111,12 +111,12 @@ function pop() local (return)
     return = this[this.length];
   ) : (
     // 😒 no way to indicate array was empty, 0 seems like "least spurious" value to return here
-    return = 0; 
+    return = 0;
   );
   return;
 );
 
-function find(value) local (return, i)
+function find(value) local(return, i)
 (
   return = -1;
   i = 0;
@@ -143,7 +143,7 @@ function recv() local(received)
 (
   //capture return value of midirecv and scope its args
   received = midirecv(m0, m1, m2, m3);
-  received && 
+  received &&
   (
     this.offset = m0;
     // m1 = status byte, some 8 bit number;
@@ -254,28 +254,40 @@ function playChanged() local(return)
 );
 
 function tempoChanged() local(return)
-(debug += 1;
+(
   return = _prevTempo !== tempo;
   return && _prevTempo = tempo;
   return;
 );
 
-//* SLIDER *//
 
-// call in @init
-function sliderWatch()
+//* VALUES *//
+
+function watch()
 (
   this.prev = this;
+  this.revert = this;
 );
 
-// call in @block
-function sliderChanged()
+function changed()
 (
   this !== this.prev &&
   (
+    this.revert = this.prev;
     this.prev = this;
     1;
   );
+);
+
+function revert()
+(
+  this = this.revert;
+  this.prev = this.revert;
+);
+
+function voidChange()
+(
+  this.prev = this;
 );
 
 
@@ -305,7 +317,7 @@ function setPeriod(samples)
 (
   this.sPhase = 1 / max(samples, 1); // disallow periods of less than 1 sample
   this.period = samples;
-); 
+);
 
 function setPeriodSeconds(seconds)
 (

@@ -33,7 +33,7 @@ s1.watchSlider(1);
 
 @block
 
-s1.sliderChanged() &&
+s1.changed() &&
 (
   coarseMSB.data2 = slider1 >> 7;
   coarseLSB.data2 = slider1 & $~7;

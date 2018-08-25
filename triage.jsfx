@@ -6,7 +6,7 @@ out_pin:none
 
 slider1:_outChan=2<1,16,1>output channel
 slider2:outNote=1<0,127,1>output note
-slider3:outNoteGroup=<0,8, 1>output note group (read/write)
+slider3:outNoteGroup=<0,16, 1>output note group (read/write)
 // out note weight (if random)
 slider4:_inChan=1<1,16,1>input channel
 slider5:inBaseNote=36<0,127,1>group 1 input note
@@ -30,7 +30,16 @@ group5.arrayInit(128);
 group6.arrayInit(128);
 group7.arrayInit(128);
 group8.arrayInit(128);
-offNotes.arrayInit(8); // index == group, value == last note played from this group
+group9.arrayInit(128);
+group10.arrayInit(128);
+group11.arrayInit(128);
+group12.arrayInit(128);
+group13.arrayInit(128);
+group14.arrayInit(128);
+group15.arrayInit(128);
+group16.arrayInit(128);
+offNotes.arrayInit(16);
+offNotes.default(-1); // index == group, value == last note played from this group
 
 function clearGroups()
 (
@@ -42,86 +51,122 @@ function clearGroups()
   group6.default(0);
   group7.default(0);
   group8.default(0);
+  group9.default(0);
+  group10.default(0);
+  group11.default(0);
+  group12.default(0);
+  group13.default(0);
+  group14.default(0);
+  group15.default(0);
+  group16.default(0);
 );
 
-function populateGroups() local (i, n)
+function populateGroups() local (note, group)
 (
   clearGroups();
-  i = 0;
-  while (i < outNoteGroups.size) (
-    n = outNoteGroups[i];
-    n == 1 && group1.push(n);
-    i += 1;
+  note = 0;
+  while (note < outNoteGroups.size) (
+    group = outNoteGroups[note];
+    group == 1 && group1.push(note);
+    group == 2 && group2.push(note);
+    group == 3 && group3.push(note);
+    group == 4 && group4.push(note);
+    group == 5 && group5.push(note);
+    group == 6 && group6.push(note);
+    group == 7 && group7.push(note);
+    group == 8 && group8.push(note);
+    group == 9 && group9.push(note);
+    group == 10 && group10.push(note);
+    group == 11 && group11.push(note);
+    group == 12 && group12.push(note);
+    group == 13 && group13.push(note);
+    group == 14 && group14.push(note);
+    group == 15 && group15.push(note);
+    group == 16 && group16.push(note);
+    note += 1;
   );
 );
 
 function isOutputNote()
-( 
-  (this.channel() == outChan)
-  && this.isNote();
+(
+  this.channel() == outChan &&
+  this.isNote();
 );
 
 function isInputNote()
 (
-  (this.channel() == inChan)
-  && this.isNote()
-  && this.note() >= inBaseNote
-  && this.note() <= maxInNote;
+  this.channel() == inChan &&
+  this.isNote() &&
+  this.note() >= inBaseNote &&
+  this.note() <= maxInNote &&
+  (
+    this.group = 1 + this.note() - inBaseNote;
+    1;
+  );
 );
 
-outNote.sliderWatch();
-outNoteGroup.sliderWatch();
-outNoteIsDown = -1;
+function getOutputNoteOn()
+(
+  // assign chan
+  this.statusLo = chan;
+
+  // get random note from group
+  this.group == 1 && this.data1 = group1.random();
+  this.group == 2 && this.data1 = group2.random();
+  this.group == 3 && this.data1 = group3.random();
+  this.group == 4 && this.data1 = group4.random();
+  this.group == 5 && this.data1 = group5.random();
+  this.group == 6 && this.data1 = group6.random();
+  this.group == 7 && this.data1 = group7.random();
+  this.group == 8 && this.data1 = group8.random();
+  this.group == 9 && this.data1 = group9.random();
+  this.group == 10 && this.data1 = group10.random();
+  this.group == 11 && this.data1 = group11.random();
+  this.group == 12 && this.data1 = group12.random();
+  this.group == 13 && this.data1 = group13.random();
+  this.group == 14 && this.data1 = group14.random();
+  this.group == 15 && this.data1 = group15.random();
+  this.group == 16 && this.data1 = group16.random();
+
+  // set note off for group
+  offNotes[this.group] = this.data1;
+
+  // display output note
+  outNote = this.data1;
+
+);
+
+function getOutputNoteOff()
+(
+  this.data1 = offNotes[this.group];
+  this.data1 == -1 ? (
+    handled = 1;
+  ) : (
+    offNotes[this.group] = -1;
+  );
+);
+
+_outChan.watch();
+_inChan.watch();
+outNote.watch();
+outNoteGroup.watch();
+assigning = -1;
+assigningViaSlider = -1;
 
 
 @slider
 
-
-// interestingly (this was when prev pointed to the previous, previous value, but still...)
-//
-// _inChan.sliderChanged() && (_inChan == _outChan) && 
-// (
-//   _prev = _inChan.prev;   // _inChan = _inChan.prev doesn't seem work in @slider.
-//   _inChan = _prev;        // maybe because it's a slider variable? it works in @block... o_O
-//   _inChan.sliderWatch();
-// );
-
 // sanitize channels
-_outChan == _inChan &&
-( 
-  _outChan != _outChan.prev ?
-  (
-    _outChan = _outChan.prev;
-  ) : (
-    _inChan = _inChan.prev;
-  );
-);
-
-// write
-outNoteGroup.sliderChanged() &&
-( 
-  outNoteGroups[outNote] = outNoteGroup;
-  populateGroups();
-);
-
-// read
-outNote.sliderChanged() &&
-(
-  outNoteGroup = outNoteGroups[outNote];
-  sliderchange(outNoteGroup);
-);
-
+_outChan.changed() && _outChan == _inChan && _outChan.revert();
+_inChan.changed() && _outChan == _inChan && _inChan.revert();
 
 // calculate constants
 outChan = _outChan - 1;
 inChan = _inChan - 1;
-maxInNote = inBaseNote + 7;
+maxInNote = inBaseNote + 15;
+
 
 @block
-
-//debuggery//
-__debugValue = debugArray[debugIndex];
-/////////////
 
 while(msg.recv())
 (
@@ -129,22 +174,43 @@ while(msg.recv())
 
   msg.isOutputNote() &&
   (
-    msg.isNoteOn() && outNoteIsDown == -1 &&
+    msg.isNoteOn() && assigning == -1 &&
     (
-      outNoteIsDown = msg.note();
-      outNote = msg.note();
-
-      // outNoteGroup = outNoteGroups[outNote];
+      assigning = msg.note();
+      outNote = assigning;
     );
-    msg.isNoteOff() &&  msg.note() == outNoteIsDown && outNoteIsDown = -1;
+    msg.isNoteOff() && msg.note() == assigning && assigning = -1;
   );
 
+  msg.isInputNote() &&
+  (
+    msg.isNoteOn() &&
+    (
+      assigning > -1 ? (
+        outNoteGroup = msg.group;
+        handled = 1;
+      ) : (
+        msg.getOutputNoteOn();
+      );
+    );
+    msg.isNoteOff() && msg.getOutputNoteOff();
+  );
+
+  !handled && msg.send();
+);
 
 
-  //debuggery//
-  msg.isOutputNote() ? __isOutNote = 1 : __isOutNote = 0;
-  msg.isInputNote() ? __isInNote = 1 : __isInNote = 0;
-  /////////////
+@sample
 
-
+// this gets super buggy when dragging sliders if it lives in in @slider or @block
+// as values can change more than once therein but changed() only gets called once
+outNoteGroup.changed() ?
+(
+  outNoteGroups[outNote] = outNoteGroup;
+  populateGroups();
+) : (
+  outNote.changed() &&
+  (
+    outNoteGroup = outNoteGroups[outNote];
+  );
 );
