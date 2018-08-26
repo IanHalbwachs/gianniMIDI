@@ -19,6 +19,8 @@ import my-lib.jsfx-inc
 
 @init
 
+ext_noinit = 1;
+
 debugArray = outNoteGroups;
 
 outNoteGroups.arrayInit(128); // index == note, value == assigned group
@@ -108,7 +110,7 @@ function isInputNote()
 function getOutputNoteOn()
 (
   // assign chan
-  this.statusLo = chan;
+  this.statusLo = outChan;
 
   // get random note from group
   this.group == 1 && this.data1 = group1.random();
@@ -137,11 +139,12 @@ function getOutputNoteOn()
 );
 
 function getOutputNoteOff()
-(
+(debug += 1;
   this.data1 = offNotes[this.group];
   this.data1 == -1 ? (
     handled = 1;
   ) : (
+    this.statusLo = outChan;
     offNotes[this.group] = -1;
   );
 );
@@ -170,6 +173,7 @@ maxInNote = inBaseNote + 15;
 
 while(msg.recv())
 (
+  msg.sanitizeNoteOffs();
   handled = 0;
 
   msg.isOutputNote() &&
