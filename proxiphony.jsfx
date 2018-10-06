@@ -1,0 +1,51 @@
+// sustains a note until another note in its proximity is played
+
+
+desc: Proxiphony (GianniMIDI)
+
+in_pin:none
+out_pin:none
+
+slider1:proximity=3<1,11,1>offset
+slider2:_channel=1<1,16,1>channel
+
+import my-lib.jsfx-inc
+
+@init
+
+playing.arrayInit(128);
+off.statusHi = 8;
+
+@slider
+
+channel = _channel - 1;
+off.statusLo = channel;
+
+@block
+
+ while (msg.recv())
+ (
+  msg.isNote() && msg.channel() == channel ? (
+    msg.isNoteOn() && (
+      note = msg.note();
+      // silence any proximal notes
+      first = note - proximity;
+      last = note + proximity;
+      i = first;
+      while (i <= last) (
+        playing[i] && (
+          off.data1 = i;
+          off.offset = msg.offset;
+          off.send();
+          playing[i] = 0;
+        );
+        i += 1;
+      );
+      // add note to playing notes
+      playing[note] = 1;
+      msg.send();
+    );
+  ) : (
+    msg.send();
+  );
+ );

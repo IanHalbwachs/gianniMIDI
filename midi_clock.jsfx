@@ -4,10 +4,10 @@ in_pin:none
 out_pin:none
 
 slider1:4<1, 64, 1>period in 1/n bars (0 -> use seconds);
-slider2:1<0.01, 1, .001>period in seconds;
+slider2:1<0.01, 1, .001>period in seconds
 slider3:36<0,127,1>clock note
 slider4:1<1,16,1>clock channel
-
+slider5:1<0,2,1{off,while playing,constant}>run
 
 import my-lib.jsfx-inc
 
@@ -40,7 +40,6 @@ msg.data1 = slider3;
 msg.statusLo = slider4 - 1;
 
 
-
 @block
 
 sampleOffset = -1;
@@ -52,11 +51,11 @@ tempoChanged() && setPeriod();
 
 sampleOffset += 1;
 
-clock.tick() && (
+((slider5 == 2) || ((slider5 == 1) && play_state)) && clock.tick() && (
   off.sendWithOffset(sampleOffset);
   msg.sendWithOffset(sampleOffset);
   off.statusHi = 8;
   off.statusLo = msg.statusLo;
-  off.statusLo = msg.statusLo;
+  off.data1 = msg.data1;
   off.data2 = 0;
 );

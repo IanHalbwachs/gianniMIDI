@@ -1,0 +1,31 @@
+desc: Linnstrument Note Lights (GianniMIDI)
+
+slider1:c=1<0,1,1>C
+slider2:db=1<0,1,1>C#/Db
+slider3:d=1<0,1,1>D
+slider4:eb=1<0,1,1>D#/Eb
+slider5:e=1<0,1,1>E
+slider6:f=1<0,1,1>F
+slider7:gb=1<0,1,1>F#/Gb
+slider8:g=1<0,1,1>G
+slider9:ab=1<0,1,1>G#/Ab
+slider10:a=1<0,1,1>A
+slider11:bb=1<0,1,1>A#/Bb
+slider12:b=1<0,1,1>B
+
+import my-lib.jsfx-inc
+
+
+@block
+c.changed() && nrpn(0, 203, c);
+db.changed() && nrpn(0, 204, db);
+d.changed() && nrpn(0, 205, d);
+eb.changed() && nrpn(0, 206, eb);
+e.changed() && nrpn(0, 207, e);
+f.changed() && nrpn(0, 208, f);
+gb.changed() && nrpn(0, 209, gb);
+g.changed() && nrpn(0, 210, g);
+ab.changed() && nrpn(0, 211, ab);
+a.changed() && nrpn(0, 212, a);
+bb.changed() && nrpn(0, 213, bb);
+b.changed() && nrpn(0, 214, b);

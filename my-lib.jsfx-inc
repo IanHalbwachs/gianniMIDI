@@ -240,6 +240,26 @@ function sanitizeNoteOffs()
   this.statusHi == 9 && this.data2 == 0 && this.statusHi = 8;
 );
 
+function nrpn(offset, param, value)// local(status, paramMsb, valueMsb)
+(
+  status = 11<<4 + 1;
+  paramMsb = param>>7;
+  valueMsb = value>>7;
+  midisend(offset, status, 99, paramMsb);
+  midisend(offset, status, 98, param - paramMsb<<7);
+  midisend(offset, status, 6, valueMsb);
+  midisend(offset, status, 38, value - valueMsb<<7);
+  midisend(offset, status, 101, 127);
+  midisend(offset, status, 100, 127);
+
+// 1011nnnn   01100011 ( 99)  0vvvvvvv         NRPN parameter number MSB CC
+// 1011nnnn   01100010 ( 98)  0vvvvvvv         NRPN parameter number LSB CC
+// 1011nnnn   00000110 (  6)  0vvvvvvv         NRPN parameter value MSB CC
+// 1011nnnn   00100110 ( 38)  0vvvvvvv         NRPN parameter value LSB CC
+// 1011nnnn   01100101 (101)  01111111 (127)   RPN parameter number Reset MSB CC
+// 1011nnnn   01100100 (100)  01111111 (127)   RPN parameter number Reset LSB CC
+);
+
 
 //* STATE *//
 
