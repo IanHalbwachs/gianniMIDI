@@ -3,7 +3,7 @@ in_pin:none
 out_pin:none
 
 slider1:_controlChan=16<0,127,1>sequencer controls channel
-slider2:clockNote=24<0,127,1>clock note
+slider2:clockNote=0<0,127,1>clock note
 slider3:learnNote=7<0,127,1>learn note
 slider4:stepNote=6<0,127,1>step note
 
@@ -11,6 +11,8 @@ import my-lib.jsfx-inc
 
 
 @init
+
+ext_noinit = 1;
 
 function isControl()
 (
@@ -70,12 +72,18 @@ function remove(_msg*)
 );
 
 seq.arrayInit(128);
+seq.default(-1);
+index = 0;
+
 heldNotes.arrayInit(128);
 holding = -1;
+HOLD_BIT = 1 << 22 ;
+
+lastNotePlayed = -1;
+
+noteOff.statusHi = 8;
 
 controlChan = _controlChan - 1;
-
-
 
 
 @slider
@@ -89,45 +97,61 @@ while(msg.recv())
 (
   handled = 0;
   msg.sanitizeNoteOffs();
-
   msg.isControl() ?
   (
+    handled = 1;
+
     msg.isLearnOn() &&
     (
+      noteOff.sendWithOffset(msg.offset);
+      seq.default(-1);
+      index = 0;
+      lastNotePlayed = -1;
       learning = 1;
-      handled = 1;
     );
 
     msg.isLearnOff() &&
     (
       learning = 0;
-      handled = 1;
     );
 
-    learning &&
-    (
+    learning ? (
       msg.isStepOn() &&
       (
-        handled = 1;
+        holding == -1 ? (
+          seq.push(lastNotePlayed);
+        ) : (
+          seq.push(holding + HOLD_BIT);
+        );
+        lastNotePlayed = -1;
       );
-
-      msg.isStepOff() &&
-      (
-        handled = 1;
-      );
-
+    ) : (
       msg.isClockOn() &&
-      (
-        handled = 1;
-      );
+      (incc += 1;
+        seq.length &&
+        (
+          noteOn = seq[index];
+          noteOn.parseBits();
+          hold = noteOn.readBits(22, 1);
 
-      msg.isClockOff() &&
-      (
-        handled = 1;
+          hold ? (
+            noteOn.sendWithOffset(msg.offset);
+            noteOff.sendWithOffset(msg.offset);
+          ) : (
+            noteOff.sendWithOffset(msg.offset);
+            noteOn.sendWithOffset(msg.offset);
+          );
+
+          // set up next note off
+          noteOff.statusLo = noteOn.statusLo;
+          noteOff.data1 = noteOn.data1;
+
+          index += 1;
+          index == seq.length && index = 0;
+        );
       );
-      // end control + learning
     );
-    // end control
+    //end control
   ) : ( 
     learning &&
     (
@@ -135,6 +159,7 @@ while(msg.recv())
       (
         holding = msg.toBits();
         heldNotes.push(holding);
+        lastNotePlayed = holding;
       );
       msg.isNoteOff() &&
       (
