@@ -8,6 +8,11 @@ function round(num) local (int)
   num - int < 0.5 ? floor(num) : ceil(num);
 );
 
+function coinToss()
+(
+  rand() < 0.5;
+);
+
 function randInt(num)
 (
   round(rand() * num);
