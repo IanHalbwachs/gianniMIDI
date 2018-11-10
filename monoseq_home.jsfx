@@ -1,0 +1,165 @@
+desc: Monophonic Step Sequencer (GianniMIDI)
+in_pin:none
+out_pin:none
+
+slider1:_controlChan=16<0,127,1>sequencer controls channel
+slider2:clockNote=24<0,127,1>clock note
+slider3:learnNote=7<0,127,1>learn note
+slider4:stepNote=6<0,127,1>step note
+
+import my-lib.jsfx-inc
+
+
+@init
+
+function isControl()
+(
+  this.statusLo == controlChan;
+);
+
+function isLearnOn()
+(
+  this.data1 == learnNote && this.statusHi == 9;
+);
+
+function isLearnOff()
+(
+  this.data1 == learnNote && this.statusHi == 8;
+);
+
+function isStepOn()
+(
+  this.data1 == stepNote && this.statusHi == 9;
+);
+
+function isStepOff()
+(
+  this.data1 == stepNote && this.statusHi == 8;
+);
+
+function isClockOn()
+(
+  this.data1 == clockNote && this.statusHi == 9;
+);
+
+function isClockOff()
+(
+  this.data1 == clockNote && this.statusHi == 8;
+);
+
+function remove(_msg*)
+(
+  i = -1;
+  j = 0;
+  while(i == -1 && j < this.length) (
+    m = this[j];
+    m.parseBits();
+    m.statusLo == _msg.statusLo && m.data1 == _msg.data1 && i = j;
+    j += 1;
+  );
+
+  i != -1 &&
+  (
+    this.length -= 1;
+    while(i < this.length)
+    (
+      this[i] = this[i + 1];
+      i+= 1;
+    );
+  );
+);
+
+seq.arrayInit(128);
+heldNotes.arrayInit(128);
+heldNotes.default(-1);
+holding = -1;
+
+nextOn = -1;
+nextOff = -1;
+
+controlChan = _controlChan - 1;
+
+
+@slider
+
+controlChan = _controlChan - 1;
+
+
+@block
+
+while(msg.recv())
+(
+  handled = 0;
+  msg.sanitizeNoteOffs();
+
+  msg.isControl() ?
+  (
+    msg.isLearnOn() &&
+    (
+      learning = 1;
+      seq.default(0);
+      handled = 1;
+    );
+
+    msg.isLearnOff() &&
+    (
+      learning = 0;
+      handled = 1;
+    );
+
+    learning &&
+    (
+      msg.isStepOn() &&
+      (
+        heldNotes.length &&
+        (
+          heldNotes.length == 1 ? (
+              seq.push(msg.toBits())
+            ) : (
+              // flag note as tied
+              seq.push(msg.toBits().writeBits(18, 1, 1));
+            );
+        )
+        handled = 1;
+      );
+
+      msg.isStepOff() &&
+      (
+        handled = 1;
+      );
+
+      msg.isClockOn() &&
+      (
+        handled = 1;
+        // advance cursor
+      );
+
+      msg.isClockOff() &&
+      (
+        // get next note
+        //
+        handled = 1;
+      );
+      // end control + learning
+    );
+    // end control
+  ) : (
+    learning &&
+    (
+      msg.isNoteOn() &&
+      (
+        holding = msg.toBits();
+        heldNotes.push(holding);
+      );
+      msg.isNoteOff() &&
+      (
+        heldNotes.remove(msg);
+        holding = heldNotes.length ? heldNotes[heldNotes.length - 1] : -1;
+        holding.parseBits();
+      );
+    );
+    //end !control + learning
+  );
+  // end !control
+  !handled && msg.send();
+);
