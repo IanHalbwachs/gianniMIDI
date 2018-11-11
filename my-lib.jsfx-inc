@@ -176,7 +176,6 @@ function send()
   );
 );
 
-
 function sendWithOffset(offset)
 (
   midisend(
@@ -263,6 +262,16 @@ function nrpn(offset, param, value)// local(status, paramMsb, valueMsb)
 // 1011nnnn   00100110 ( 38)  0vvvvvvv         NRPN parameter value LSB CC
 // 1011nnnn   01100101 (101)  01111111 (127)   RPN parameter number Reset MSB CC
 // 1011nnnn   01100100 (100)  01111111 (127)   RPN parameter number Reset LSB CC
+);
+
+function allNotesOff() local(i)
+(
+  i = 0;
+  while (i < 16)
+  (
+    midisend(0, (11<<4 + i), 123, 0);
+    i += 1;
+  );
 );
 
 
