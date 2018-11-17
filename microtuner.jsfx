@@ -1,0 +1,53 @@
+desc: MPE Microtuner (GianniMIDI)
+
+// Incoming PB messages are ignored. Incoming notes are output on
+// channel==pitch class, with corresponding pitch bend applied.
+// Requires a VST that applies PB independently per channel, such as u-he Diva.
+
+in_pin:none
+out_pin:none
+
+slider1:c=0<-100,100,1>C / 0
+slider2:db=0<-100,100,1>D# / 1
+slider3:d=0<-100,100,1>D / 2
+slider4:eb=0<-100,100,1>Eb / 3
+slider5:e=0<-100,100,1>E / 4
+slider6:f=<-100,100,1>F / 5
+slider7:gb=<-100,100,1>F# / 6
+slider8:g=<-100,100,1>G / 7
+slider9:ab=<-100,100,1>Ab / 8
+slider10:a=<-100,100,1>A / 9
+slider11:bb=<-100,100,1>Bb / 10
+slider12:b=<-100,100,1>B /11
+
+import my-lib.jsfx-inc
+
+@block
+
+sampleOffest = -1;
+
+@sample
+
+sampleOffset += 1;
+
+c.changed() && pitchBend(sampleOffset, 0, c);
+db.changed() && pitchBend(sampleOffset, 1, db);
+d.changed() && pitchBend(sampleOffset, 2, d);
+eb.changed() && pitchBend(sampleOffset, 3, eb);
+e.changed() && pitchBend(sampleOffset, 4, e);
+f.changed() && pitchBend(sampleOffset, 5, f);
+gb.changed() && pitchBend(sampleOffset, 6, gb);
+g.changed() && pitchBend(sampleOffset, 7, g);
+ab.changed() && pitchBend(sampleOffset, 8, ab);
+a.changed() && pitchBend(sampleOffset, 9, a);
+bb.changed() && pitchBend(sampleOffset, 10, bb);
+b.changed() && pitchBend(sampleOffset, 11, b);
+
+
+while (msg.recv())
+(
+  handled = 0;
+  msg.isPitchBend() && handled = 1;
+  msg.isNote() && msg.statusLo = msg.note() % 12;
+  !handled && msg.send();
+);

@@ -220,6 +220,11 @@ function isCC()
   this.statusHi == 11;
 );
 
+function isPitchBend()
+(
+  this.statusHi == 14;
+);
+
 // usage: msg.recv(),
 // x = msg.toBits() -> now x is a number you can store in an array or whatever
 function toBits()
@@ -263,6 +268,15 @@ function nrpn(offset, param, value)// local(status, paramMsb, valueMsb)
 // 1011nnnn   00100110 ( 38)  0vvvvvvv         NRPN parameter value LSB CC
 // 1011nnnn   01100101 (101)  01111111 (127)   RPN parameter number Reset MSB CC
 // 1011nnnn   01100100 (100)  01111111 (127)   RPN parameter number Reset LSB CC
+);
+
+function pitchBend(offset, channel, cents) local (cent, val, msb, lsb)
+(
+  cent = 2^14 / 2400;
+  val = min((cents + 1200) * cent, $~14);
+  msb = val>>7;
+  lsb = val & $~7;
+  midisend(offset, (14<<4 + channel), lsb, msb);
 );
 
 
