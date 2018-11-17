@@ -1,0 +1,120 @@
+desc: Note Stream Generator (GianniMIDI)
+in_pin:none
+out_pin:none
+
+slider1:lowOctave=4<0,9,1>Low octave (middle C = 5)
+slider2:highOctave=6<0,9,1>High octave
+slider3:lowVel=100<1,127,1>Low velocity
+slider4:density=5<1,10,1>Density
+slider5:maxLen=8<1,16,1>Max note length (teenths)
+slider6:c=1<0,1,1>C
+slider7:db=1<0,1,1>C#/Db
+slider8:d=1<0,1,1>D
+slider9:eb=1<0,1,1>D#/Eb
+slider10:e=1<0,1,1>E
+slider11:f=1<0,1,1>F
+slider12:gb=1<0,1,1>F#/Gb
+slider13:g=1<0,1,1>G
+slider14:ab=1<0,1,1>G#/Ab
+slider15:a=1<0,1,1>A
+slider16:bb=1<0,1,1>A#/Bb
+slider17:b=1<0,1,1>B
+
+import my-lib.jsfx-inc
+
+
+@init
+
+pool.arrayInit(12);
+
+function populate()
+(
+  allNotesOff();
+  pool.default(0);
+  c && pool.push(0);
+  db && pool.push(1);
+  d && pool.push(2);
+  eb && pool.push(3);
+  e && pool.push(4);
+  f && pool.push(5);
+  gb && pool.push(6);
+  g && pool.push(7);
+  ab && pool.push(8);
+  a && pool.push(9);
+  bb && pool.push(10);
+  b && pool.push(11);
+);
+
+populate();
+
+clock.cInit();
+
+next = 0;
+nextOff = -1;
+
+on.statusHi = 9;
+off.statusHo = 8;
+
+function sendOff()
+(
+  off.data1 = nextOff;
+  off.sendWithOffset(sampleOffset);
+  nextOff = -1;
+);
+
+function sendOn()
+(
+  on.data1 = pool.random() + (12 * (lowOctave + randInt(octRange))) ;
+  on.data2 = lowVel + randInt(velRange);
+  on.sendWithOffset(sampleOffset);
+  hold = randInt(maxLen);
+  nextOff = on.data1;
+);
+
+@slider
+
+clock.setPeriodBars(1/16);
+
+octRange = highOctave - lowOctave;
+velRange = 127 - lowVel;
+
+(
+  c.changed()
+  || db.changed()
+  || d.changed()
+  || eb.changed()
+  || e.changed()
+  || f.changed()
+  || gb.changed()
+  || g.changed()
+  || ab.changed()
+  || a.changed()
+  || bb.changed()
+  || b.changed()
+) && populate();
+
+@block
+
+sampleOffset = -1;
+
+@sample
+
+sampleOffset += 1;
+
+tempoChanged() && clock.setPeriodBars(1/16);
+
+clock.tick() &&
+(
+  hold > 0 && hold -= 1;
+
+  hold == 0 &&
+  (
+    sendOff();
+    hold = -1;
+  );
+
+  hold == -1 &&
+  (
+    randInt(10) < density && sendOn();
+  );
+);

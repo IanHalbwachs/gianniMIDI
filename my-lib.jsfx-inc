@@ -176,7 +176,6 @@ function send()
   );
 );
 
-
 function sendWithOffset(offset)
 (
   midisend(
@@ -277,6 +276,16 @@ function pitchBend(offset, channel, cents) local (cent, val, msb, lsb)
   msb = val>>7;
   lsb = val & $~7;
   midisend(offset, (14<<4 + channel), lsb, msb);
+);
+
+function allNotesOff() local(i)
+(
+  i = 0;
+  while (i < 16)
+  (
+    midisend(0, (11<<4 + i), 123, 0);
+    i += 1;
+  );
 );
 
 
