@@ -1,0 +1,79 @@
+// Note that you can set any note pad's light to any color by sending LinnStrument a series of three MIDI Control Change messages:
+
+// 1) CC20: Column number of note pad to change (control key column is 0, left play column is 1, right play column is 25)
+// 2) CC21: Row number of note pad to change (bottom row is 0, top is 7)
+// 3) CC22: Color to change it to (0=as set in Note Lights settings, 1=red, 2=yellow, 3=green, 4=cyan, 5=blue, 6=magenta, 7=off).
+
+// First send CC20 and CC21 to select the column and row to be lit, then send CC22 to light it.
+
+desc: Linnstrument Note Lights 2 (GianniMIDI)
+
+slider1:c=0<0,3,1>C - 0
+slider2:db=0<0,3,1>C#/Db - 1
+slider3:d=0<0,3,1>D - 2
+slider4:eb=0<0,3,1>D#/Eb - 3
+slider5:e=0<0,3,1>E - 4
+slider6:f=0<0,3,1>F - 5
+slider7:gb=0<0,3,1>F#/Gb - 6
+slider8:g=0<0,3,1>G - 7
+slider9:ab=0<0,3,1>G#/Ab - 8
+slider10:a=0<0,3,1>A - 9
+slider11:bb=0<0,3,1>A#/Bb - 10
+slider12:b=0<0,3,1>B - 11
+
+import my-lib.jsfx-inc
+
+
+@init
+
+cells.arrayInit(17);
+
+function getColor(sliderValue) local (colorValue)
+(
+  colorValue = 7; // off
+  sliderValue == 1 && colorValue = 3; // green
+  sliderValue == 2 && colorValue = 5; // blue
+  sliderValue == 3 && colorValue = 2; // yellow
+  colorValue;
+);
+
+function lightCell(cell, value)
+(
+  column = (cell % 25) + 1; // col 0 is control lights
+  row = (cell / 25)>>0;
+  midisend(0, 11<<4, 20, column);
+  midisend(0, 11<<4, 21, row);
+  midisend(0, 11<<4, 22, getColor(value));
+);
+
+function isOurNote(cell, note)
+(
+  column = cell % 25;
+  row = (cell / 25)>>0;
+  offset = row * -5;
+  (column - offset - note - 6) % 12 == 0;
+);
+
+function setNoteColor(note, value) local(i)
+(
+  cell = 0;
+  while(cell < 200)
+  (
+    isOurNote(cell, note) && lightCell(cell, value);
+    cell += 1;
+  );
+);
+
+@block
+c.changed() && setNoteColor(0, c);
+db.changed() && setNoteColor(1, db);
+d.changed() && setNoteColor(2, d);
+eb.changed() && setNoteColor(3, eb);
+e.changed() && setNoteColor(4, e);
+f.changed() && setNoteColor(5, f);
+gb.changed() && setNoteColor(6, gb);
+g.changed() && setNoteColor(7, g);
+ab.changed() && setNoteColor(8, ab);
+a.changed() && setNoteColor(9, a);
+bb.changed() && setNoteColor(10, bb);
+b.changed() && setNoteColor(11, b);
