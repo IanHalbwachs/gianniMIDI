@@ -17,6 +17,7 @@ function sendNoteOff(offset)
 
 function clearHeld()
 (
+  held == -1;
   held.statusHi = -1;
   held.statusLo = -1;
   held.data1 = -1;
@@ -32,20 +33,17 @@ while (msg.recv())
 (
   msg.isNoteOn() &&
   (
-    held != -1 &&
-    (
-      held.sendNoteOff(msg.offset);
-      held = msg.toBits();
-      held.parseBits();
-      msg.send();
-    );
+    held != -1 && held.sendNoteOff(msg.offset);
+    msg.send();
+    held = msg.toBits();
+    held.parseBits();
   );
 
   msg.isNoteOff() &&
   (
     msg.data1 == held.data1 &&
     (
-      held = 0;
+      clearHeld();
       msg.send();
     );
   );
