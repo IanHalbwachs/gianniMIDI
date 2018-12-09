@@ -32,10 +32,13 @@ while (msg.recv())
 (
   msg.isNoteOn() &&
   (
-    held != -1 && held.sendNoteOff(msg.offset);
-    held = msg.toBits();
-    held.parseBits();
-    msg.send();
+    held != -1 &&
+    (
+      held.sendNoteOff(msg.offset);
+      held = msg.toBits();
+      held.parseBits();
+      msg.send();
+    );
   );
 
   msg.isNoteOff() &&
