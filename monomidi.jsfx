@@ -1,0 +1,49 @@
+desc: Force Monophonic MIDI
+
+in_pin:none
+out_pin:none
+
+import my-lib.jsfx-inc
+
+
+@init
+
+function sendNoteOff(offset)
+(
+  this.statusHi = 8;
+  this.data2 = 0;
+  this.sendWithOffset(offset);
+);
+
+function clearHeld()
+(
+  held.statusHi = -1;
+  held.statusLo = -1;
+  held.data1 = -1;
+  held.data2 = -1;
+);
+
+clearHeld();
+
+
+@block
+
+while (msg.recv())
+(
+  msg.isNoteOn() &&
+  (
+    held != -1 && held.sendNoteOff(msg.offset);
+    held = msg.toBits();
+    held.parseBits();
+    msg.send();
+  );
+
+  msg.isNoteOff() &&
+  (
+    msg.data1 == held.data1 &&
+    (
+      held = 0;
+      msg.send();
+    );
+  );
+);

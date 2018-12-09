@@ -5,5 +5,5 @@ slider1:1<0,1,0.01>volume
 
 @sample
 
-spl0 = spl0 * slider1;
-spl1 = spl1 * slider1;  
+spl0 = slider1 > .7 ? (spl0 * slider1) : 0;
+spl1 = spl0;

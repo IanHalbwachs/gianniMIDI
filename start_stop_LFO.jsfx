@@ -54,11 +54,11 @@ while (msg.recv())
   msg.send();
 );
 
-heldNotes && slider5 = calcShape(slider4);
+/*heldNotes*/ 1 && slider5 = calcShape(slider4);
 
 
 @sample
 
 tempochanged() && setPeriod();
 
-heldNotes && clock.tick();
+/*heldNotes*/ 1 && clock.tick();
