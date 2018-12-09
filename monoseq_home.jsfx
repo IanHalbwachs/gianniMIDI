@@ -114,12 +114,14 @@ while(msg.recv())
         heldNotes.length &&
         (
           heldNotes.length == 1 ? (
-              seq.push(msg.toBits())
+              seq.push(msg.toBits());
             ) : (
               // flag note as tied
-              seq.push(msg.toBits().writeBits(18, 1, 1));
+              msg.toBits();
+              msg.writeBits(18, 1, 1);
+              seq.push(msg);
             );
-        )
+        );
         handled = 1;
       );
 
