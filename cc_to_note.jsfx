@@ -16,7 +16,7 @@ import my-lib.jsfx-inc
 function toNoteOn()
 (
   this.statusHi = 9;
-  noteChanel && this.statusLo = noteChannel - 1;
+  noteChannel && this.statusLo = noteChannel - 1;
   this.data1 = note;
   this.data2 = 127;
 );
@@ -24,7 +24,7 @@ function toNoteOn()
 function toNoteOff()
 (
   this.statusHi = 8;
-  noteChanel && this.statusLo = noteChannel - 1;
+  noteChannel && this.statusLo = noteChannel - 1;
   this.data1 = note;
   this.data2 = 0;
 );
