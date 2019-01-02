@@ -1,0 +1,60 @@
+desc: CC to Note (GianniMIDI)
+
+in_pin:none
+out_pin:none
+
+slider1:cc=64<0,127,1>CC
+slider2:channel=0<0,16,1>CC Channel (0 = all)
+slider3:note=36<0,127,1>Note
+slider4:noteChannel=0<0,16,1>Note Channel (0 = match CC)
+
+import my-lib.jsfx-inc
+
+
+@init
+
+function toNoteOn()
+(
+  this.statusHi = 9;
+  noteChanel && this.statusLo = noteChannel - 1;
+  this.data1 = note;
+  this.data2 = 127;
+);
+
+function toNoteOff()
+(
+  this.statusHi = 8;
+  noteChanel && this.statusLo = noteChannel - 1;
+  this.data1 = note;
+  this.data2 = 0;
+);
+
+
+@block
+
+while (msg.recv())
+(
+  convert = msg.isCC()
+            && (channel == -1 || msg.channel() == channel)
+            && msg.data1 = cc;
+
+  !convert && msg.send();
+
+  convert &&
+  (
+    prevVal = val;
+    val = msg.data2;
+  );
+
+  prevVal < 64 && val >= 64 &&
+  (
+    msg.toNoteOn();
+    msg.send();
+  );
+
+  prevVal >= 64 && val < 64 &&
+  (
+    msg.toNoteOff();
+    msg.send();
+  );
+);

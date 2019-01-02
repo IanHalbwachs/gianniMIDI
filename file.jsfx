@@ -1,0 +1,51 @@
+desc: file test
+
+in_pin:none
+out_pin:none
+
+slider1:/gianni_files:none:File
+
+import my-lib.jsfx-inc
+
+
+@slider
+
+array.arrayInit(10);
+array.push(10);
+
+fileHandle = file_open(slider1);
+fileHandle > 0 && file_text(fileHandle) ?
+(o =1;
+  while
+  (
+    file_var(fileHandle,x);
+    file_avail(fileHandle) ? mapSize += 1;
+  );
+  file_close(fileHandle);
+);
+
+@block
+
+//while (midirecv(m0, m1, m2, m3))
+//(
+//  offset = m0;
+//  statusHi = m1 >> 4;
+//  statusLo = m1 & $~4;
+//  data1 = m2;
+//  data2 = m3;
+
+//  midisend(m0, m1, m2, m3);
+//);
+
+ while (msg.recv())
+ (
+   offset = msg.offset;
+   statusHi = msg.statusHi;
+   statusLo = msg.statusLo;
+   data1 = msg.data1;
+   data2 = msg.data2;
+
+   msg.send();
+
+   slider6 += 1;
+ );
