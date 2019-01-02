@@ -13,6 +13,9 @@ import my-lib.jsfx-inc
 
 @init
 
+prevVal = 0;
+val = 16;
+
 function toNoteOn()
 (
   this.statusHi = 9;
@@ -35,24 +38,25 @@ function toNoteOff()
 while (msg.recv())
 (
   convert = msg.isCC()
-            && (channel == -1 || msg.channel() == channel)
-            && msg.data1 = cc;
+            && ((channel == 0) || (msg.channel() == (channel - 1)))
+            && msg.data1 == cc;
 
   !convert && msg.send();
 
   convert &&
   (
-    prevVal = val;
-    val = msg.data2;
+    ccChannel = msg.channel();
+    prevVal[ccChannel] = val[ccChannel];
+    val[ccChannel] = msg.data2;
   );
 
-  prevVal < 64 && val >= 64 &&
+  prevVal[ccChannel] < 64 && val[ccChannel] >= 64 &&
   (
     msg.toNoteOn();
     msg.send();
   );
 
-  prevVal >= 64 && val < 64 &&
+  prevVal[ccChannel] >= 64 && val[ccChannel] < 64 &&
   (
     msg.toNoteOff();
     msg.send();
